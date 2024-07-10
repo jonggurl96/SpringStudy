@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="https://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" charset="UTF-8" content="text/html">
+	<title>로그인</title>
+	<link rel="stylesheet" th:href="@{/css/login.css}">
+	<script th:src="@{/js/login.js}"></script>
+</head>
+<body>
+<input type="hidden" name="" th:value="${contextPath}">
+<div id="section">
+	<div id="loginForm">
+		<form name="loginForm" th:action="@{/login}" method="post">
+			<h1 class="tit_login">로그인</h1>
+			<div class="userForm">
+				<div class="userInfo">
+					<label for="userId">ID: </label>
+					<input type="text" name="username" id="userId">
+				</div>
+				<div class="userInfo">
+					<label for="pwd">PW: </label>
+					<input type="password" name="password" id="pwd">
+				</div>
+			</div>
+			<div class="btnsForm">
+				<button type="button" id="loginBtn">로그인</button>
+				<button type="button">회원가입</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+</body>
+</html>
