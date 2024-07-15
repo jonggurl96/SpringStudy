@@ -6,9 +6,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * GlobalExceptionHandler.java
@@ -22,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Slf4j
 @Component
+@ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 	
@@ -36,11 +40,41 @@ public class GlobalExceptionHandler {
 	public ModelAndView doResolveException(Exception ex,
 	                                       HttpServletRequest request,
 	                                       HttpServletResponse response) {
-		return new ModelAndView(DEFAULT_ERROR_PAGE);
+		return handleException(ex, request, response, DEFAULT_ERROR_PAGE);
 	}
 	
-	private ModelAndView handleException(String view) {
-		return new ModelAndView(view);
+	private ModelAndView handleException(Exception ex,
+	                                     HttpServletRequest request,
+	                                     HttpServletResponse response,
+	                                     String view) {
+		ModelAndView mav = new ModelAndView(view);
+		
+		if(isAjax(request)) {
+			Map<String, String> msgMap = new HashMap<>();
+			
+			response.reset();
+			response.setStatus(HttpServletResponse.SC_OK);
+			
+			String message = ex.getMessage();
+			if(message == null || message.isBlank())
+				message = DEFAULT_ERROR_MESSAGE;
+			
+			msgMap.put("errMsg", message);
+			
+			mav.addAllObjects(msgMap);
+			log.debug(">>> Global Exception Handler. ErrMsg: {}", message);
+		}
+		
+		else {
+			String message = ex.getMessage();
+			if(message == null || message.isBlank())
+				message = DEFAULT_ERROR_MESSAGE;
+			Map<String, String> msgMap = new HashMap<>();
+			msgMap.put("errMsg", message);
+			mav.addAllObjects(msgMap);
+		}
+		
+		return mav;
 	}
 	
 	private boolean isAjax(HttpServletRequest request) {

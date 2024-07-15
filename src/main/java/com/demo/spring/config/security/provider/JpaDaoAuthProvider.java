@@ -27,8 +27,8 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		if(!customUserDetails.getUserDTO().getUserId().equals(username))
 			throw new RuntimeException("로그인 정보 불일치");
 		
-//		if(!credentials.get("password").equals(customUserDetails.getPassword()))
-//			throw new RuntimeException("비밀번호 불일치");
+		if(!credentials.get("password").equals(customUserDetails.getPassword()))
+			throw new RuntimeException("비밀번호 불일치");
 	}
 	
 }
