@@ -27,39 +27,48 @@ flowchart TD
 
 # Tables
 
-###### [ddls](./scripts/ddl_pgsql.sql)
+##### Postgresql Query
 
-> ### TC_TABLE_NOS
-> PK 저장 테이블
-> - TABLE_NAME varchar(50)
-> - LAST_NO integer
+- [ddls](./scripts/ddl_pgsql.sql)
+- [dmls](./scripts/dml_pgsql.sql)
 
-> ### TN_USERS
-> User 저장 테이블
-> - USER_NO varchar(20)
-> - USER_ID varchar(20)
-> - USERNAME varchar(20)
-> - PASSWORD text
+```mermaid
+classDiagram
+    class TC_TABLE_NOS {
+        -TABLE_NAME : varchar
+        -LAST_NO : int
+        +getNextId(tblName: String) int
+    }
+    class TN_USERS {
+        -USER_NO : varchar
+        -USER_ID : varchar
+        -USERNAME : varchar
+        -PASSWORD : text
+    }
+    class TN_MENU {
+        -MENU_NO : varchar
+        -MENU_NM : varchar
+        -MENU_URL : varchar
+    }
+    class TC_AUTHORITY {
+        -AUTH_CODE : varchar
+        -AUTH_NAME : varchar
+        -UPPER_CODE : varchar
+    }
+    class TN_MENU_AUTHORITY {
+        -MENU_NO : varchar
+        -AUTHOR_CODE : varchar
+    }
+    class TN_USER_AUTHORITY {
+        -USER_NO : varchar
+        -AUTHOR_CODE : varchar
+    }
+    TC_TABLE_NOS -- TN_USERS
+    TC_TABLE_NOS -- TN_MENU
+    TN_USERS -- TN_USER_AUTHORITY
+    TN_MENU -- TN_MENU_AUTHORITY
+    TN_USER_AUTHORITY -- TC_AUTHORITY
+    TN_MENU_AUTHORITY -- TC_AUTHORITY
+```
 
-> ### TC_AUTHORITY
-> 권한코드 목록
-> - AUTH_CODE varchar(20)
-> - AUTH_NAME varchar(20)
-> - UPPER_CODE varchar(20)
-
-> ### TN_MENU
-> 메뉴 목록
-> - MENU_NO varchar(20)
-> - MENU_NM varchar(50)
-> - MENU_URL varchar(50)
-
-> ### TN_USER_AUTHORITY
-> 사용자별 권한 목록
-> - USER_NO varchar(20)
-> - AUTHOR_CODE varchar(20)
-
-> ### TN_MENU_AUTHORITY
-> 메뉴별 권한 목록
-> - MENU_NO varchar(20)
-> - AUTHOR_CODE varchar(20)
 
