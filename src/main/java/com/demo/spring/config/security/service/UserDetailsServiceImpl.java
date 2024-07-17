@@ -6,6 +6,7 @@ import com.demo.spring.sec.role.usr.repository.UserAuthorRepository;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.usr.repository.UserRepository;
+import com.demo.spring.usr.vo.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,16 +29,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserDTO userDTO = new UserDTO(userRepository.findByUserId(username));
+		User user = userRepository.findByUserId(username);
+		if(user == null)
+			throw new UsernameNotFoundException("User Name " + username + "Not found Exception occured.");
+		UserDTO userDTO = new UserDTO(user);
 		List<UserAuthority> userAuthorities = userAuthorRepository.findByUserNo(userDTO.getUserNo());
-		CustomUserDetails customUserDetails = CustomUserDetails.builder()
+		return CustomUserDetails.builder()
 				.userDTO(userDTO)
 				.authorities(userAuthorities.stream()
 						             .map(UserAuthority::getAuthorCode)
 						             .map(SimpleGrantedAuthority::new)
 						             .collect(Collectors.toUnmodifiableList()))
 				.build();
-		return customUserDetails;
 	}
 	
 }

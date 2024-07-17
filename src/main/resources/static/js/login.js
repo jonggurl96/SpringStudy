@@ -1,8 +1,11 @@
 window.onload = () => {
+	const errMsg = document.querySelector("#errMsg").value
+	if(errMsg)
+		alert(errMsg)
+
 	document.querySelector("#loginBtn").addEventListener("click", () => {
 		document.loginForm.submit()
 	})
-
 }
 
 function getContextPath() {

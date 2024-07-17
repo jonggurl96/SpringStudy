@@ -7,24 +7,23 @@ import com.demo.spring.config.security.handler.LoginFailureHandler;
 import com.demo.spring.config.security.handler.LoginSuccessHandler;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-	
-	private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 	
 	private final UserDetailsService userDetailsService;
 	
@@ -43,7 +42,7 @@ public class SecurityConfig {
 	@Bean
 	public AuthenticationFilter authenticationFilter(HttpSecurity http) throws Exception {
 		AuthenticationFilter filter = new AuthenticationFilter();
-		filter.setFilterProcessesUrl("/login");
+		filter.setFilterProcessesUrl("/actionLogin");
 		filter.setAuthenticationManager(authenticationManager(http));
 		filter.setAuthenticationSuccessHandler(loginSuccessHandler());
 		filter.setAuthenticationFailureHandler(loginFailureHandler());
@@ -53,12 +52,31 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable);
+		
 		http.formLogin(page -> page.loginPage("/login").permitAll());
-		http.authorizeHttpRequests(requests -> requests.requestMatchers(new AntPathRequestMatcher("/**"))
-				.permitAll());
+		
+		http.authorizeHttpRequests(requests -> requests
+				.requestMatchers("/actionLogin", "/login**")
+				.permitAll()
+				.anyRequest()
+				.authenticated());
+		
 		http.addFilterBefore(authenticationFilter(http), UsernamePasswordAuthenticationFilter.class);
-		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint()));
+		
+		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login")));
+
+//		http.logout(logout -> logout
+//				.logoutUrl("/logout")
+//				.permitAll()
+//				.clearAuthentication(true)
+//				.invalidateHttpSession(true)
+//				.logoutSuccessHandler(null));
 		return http.build();
+	}
+	
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 	}
 	
 	@Bean
@@ -69,7 +87,7 @@ public class SecurityConfig {
 	@Bean
 	public LoginFailureHandler loginFailureHandler() {
 		LoginFailureHandler loginFailureHandler = new LoginFailureHandler();
-		loginFailureHandler.setForwardUrl("/");
+		loginFailureHandler.setForwardUrl("/login");
 		return loginFailureHandler;
 	}
 	
