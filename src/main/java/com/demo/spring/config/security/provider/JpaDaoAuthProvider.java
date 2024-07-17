@@ -24,8 +24,11 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
 		HashMap<String, Object> credentials = (HashMap<String, Object>) authentication.getCredentials();
 		
-		if(!credentials.get("password").equals(customUserDetails.getPassword()))
-			throw new PasswordNotMatchException("비밀번호 불일치");
+		if(!credentials.get("password").equals(customUserDetails.getPassword())) {
+			int maxCo = 5; // yml 파일에서 로그인 실패 횟수 정의
+			int userCo = 1; // tn_users 테이블에 칼럼 추가
+			throw new PasswordNotMatchException(String.format("%d/%d", userCo, maxCo));
+		}
 	}
 	
 }

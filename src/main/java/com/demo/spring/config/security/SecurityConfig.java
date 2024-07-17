@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -58,6 +59,8 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(requests -> requests
 				.requestMatchers("/actionLogin", "/login**")
 				.permitAll()
+				.requestMatchers("/api/a/**").hasRole("A")
+				.requestMatchers("/api/b/**").hasRole("B")
 				.anyRequest()
 				.authenticated());
 		
@@ -71,6 +74,11 @@ public class SecurityConfig {
 //				.clearAuthentication(true)
 //				.invalidateHttpSession(true)
 //				.logoutSuccessHandler(null));
+		
+		http.sessionManagement(configurer -> configurer
+				.sessionFixation()
+				.changeSessionId()
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 		return http.build();
 	}
 	
