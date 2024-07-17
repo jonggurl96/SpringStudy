@@ -6,7 +6,6 @@ import com.demo.spring.config.excptn.exception.LoginFailedTooMuchException;
 import com.demo.spring.config.excptn.exception.NotConfirmedException;
 import com.demo.spring.config.excptn.exception.PasswordNotMatchException;
 import com.demo.spring.config.security.util.LoginResultCode;
-import io.micrometer.observation.transport.ResponseContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,8 +17,6 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import java.io.IOException;
 import java.net.URLEncoder;
