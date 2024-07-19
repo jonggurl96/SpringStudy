@@ -4,6 +4,7 @@ package com.demo.spring.usr.web;
 import com.demo.spring.config.security.annotation.AuthenticationUser;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -19,8 +20,12 @@ public class LoginController extends AbstractController {
 	
 	@GetMapping(value = "/login")
 	public String loginPage(Model model,
+	                        HttpSession session,
 	                        @RequestParam(value = "code", required = false) String code,
 	                        @RequestParam(value = "errMsg", required = false) String errMsg) throws Exception {
+		Object jsessionId = session.getAttribute("JSESSIONID");
+		if(jsessionId != null)
+			session.setAttribute("JSESSIONID", null);
 		if(code != null)
 			log.debug(">>> code: {}, errMsg: {}", code, errMsg);
 		model.addAttribute("errMsg", errMsg);

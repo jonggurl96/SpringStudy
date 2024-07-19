@@ -1,0 +1,11 @@
+decoder:
+  rsa:
+    attr:
+      mod: __RSA__MODULUS__
+      exp: __RSA__EXPONENT__
+      key: __RSA__PRIVATE__KEY__
+    key:
+      size: 2048
+    radix:
+      modulus: 16
+      exponent: 16

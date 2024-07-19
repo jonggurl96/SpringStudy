@@ -1,6 +1,6 @@
 spring:
   application:
-    name: jwt
+    name: SpringStudy
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/springstudy
@@ -48,3 +48,13 @@ logging:
 
 login:
   maxTryNo: 5
+
+jwt:
+  lifetime:
+    minute: 10
+  token:
+    prefix: Bearer
+    header: Authorization
+
+decoder:
+  type: RSA

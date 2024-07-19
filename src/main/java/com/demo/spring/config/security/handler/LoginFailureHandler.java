@@ -1,10 +1,10 @@
 package com.demo.spring.config.security.handler;
 
 
-import com.demo.spring.config.excptn.exception.AccessDeniedException;
-import com.demo.spring.config.excptn.exception.LoginFailedTooMuchException;
-import com.demo.spring.config.excptn.exception.NotConfirmedException;
-import com.demo.spring.config.excptn.exception.PasswordNotMatchException;
+import com.demo.spring.config.security.exception.AccessDeniedException;
+import com.demo.spring.config.security.exception.LoginFailedTooMuchException;
+import com.demo.spring.config.security.exception.NotConfirmedException;
+import com.demo.spring.config.security.exception.PasswordNotMatchException;
 import com.demo.spring.config.security.util.LoginResultCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

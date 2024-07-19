@@ -6,6 +6,8 @@ import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.LoginFailureHandler;
 import com.demo.spring.config.security.handler.LoginSuccessHandler;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
+import com.demo.spring.config.security.util.helper.DecoderGenHelper;
+import com.demo.spring.config.security.util.vo.DecoderVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -18,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,11 +31,18 @@ public class SecurityConfig {
 	
 	private final UserDetailsService userDetailsService;
 	
+	private final DecoderGenHelper<? extends DecoderVO> genHelper;
+	
 	@Bean
-	public JpaDaoAuthProvider jpaDaoAuthProvider() {
-		return new JpaDaoAuthProvider(userDetailsService);
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 	
+	@Bean
+	public JpaDaoAuthProvider jpaDaoAuthProvider() {
+		return new JpaDaoAuthProvider(userDetailsService, bCryptPasswordEncoder());
+	}
+
 	@Bean
 	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 		return http.getSharedObject(AuthenticationManagerBuilder.class)
@@ -41,14 +51,15 @@ public class SecurityConfig {
 	}
 	
 	@Bean
-	public AuthenticationFilter authenticationFilter(HttpSecurity http) throws Exception {
-		AuthenticationFilter filter = new AuthenticationFilter();
+	public AuthenticationFilter authenticationFilter(AuthenticationManager authenticationManager) throws Exception {
+		AuthenticationFilter filter = new AuthenticationFilter(genHelper);
 		filter.setFilterProcessesUrl("/actionLogin");
-		filter.setAuthenticationManager(authenticationManager(http));
+		filter.setAuthenticationManager(authenticationManager);
 		filter.setAuthenticationSuccessHandler(loginSuccessHandler());
 		filter.setAuthenticationFailureHandler(loginFailureHandler());
 		return filter;
 	}
+	
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -63,10 +74,11 @@ public class SecurityConfig {
 				.requestMatchers("/api/b/**").hasRole("B")
 				.anyRequest()
 				.authenticated());
-		
-		http.addFilterBefore(authenticationFilter(http), UsernamePasswordAuthenticationFilter.class);
+
+		http.addFilterBefore(authenticationFilter(authenticationManager(http)), UsernamePasswordAuthenticationFilter.class);
 		
 		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login")));
+
 
 //		http.logout(logout -> logout
 //				.logoutUrl("/logout")
