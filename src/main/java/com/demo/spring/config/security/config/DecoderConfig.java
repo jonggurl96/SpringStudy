@@ -1,11 +1,9 @@
 package com.demo.spring.config.security.config;
 
 
-import com.demo.spring.config.security.util.helper.DecoderGenHelper;
 import com.demo.spring.config.security.util.helper.RSAGenHelper;
-import com.demo.spring.config.security.util.properties.DecoderProperties;
 import com.demo.spring.config.security.util.properties.RSAProperties;
-import com.demo.spring.config.security.util.vo.DecoderVO;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,30 +15,17 @@ import org.springframework.context.annotation.PropertySource;
 @Setter
 @PropertySource("classpath:/static/properties/decoder.yml")
 @Configuration
+@RequiredArgsConstructor
 public class DecoderConfig {
+	
+	private final RSAProperties rsaProperties;
 	
 	@Value("${decoder.type}")
 	private String type;
 	
 	@Bean
-	public DecoderGenHelper<? extends DecoderVO> genHelper() {
-		return switch(type) {
-			case "RSA" -> rsaGenHelper();
-			default -> null;
-		};
-	}
-	
-	private RSAGenHelper rsaGenHelper() {
-		DecoderProperties properties = getProperties();
-		return new RSAGenHelper(properties.getKeySize(), properties.getRadixModulus(), properties.getRadixExponent(), properties.getAttrKey(), properties.getAttrMod(), properties.getAttrExp());
-	}
-	
-	@Bean
-	public DecoderProperties getProperties() {
-		return switch(type) {
-			case "RSA" -> new RSAProperties();
-			default -> null;
-		};
+	public RSAGenHelper rsaGenHelper() {
+		return new RSAGenHelper(rsaProperties);
 	}
 	
 }

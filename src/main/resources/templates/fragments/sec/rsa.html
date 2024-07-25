@@ -6,8 +6,10 @@
 </head>
 <body>
 <th:block th:fragment="hidden">
-	<input type="hidden" name="__RSA__MODULUS__" id="crypto-modulus" th:value="${__RSA__MODULUS__}">
-	<input type="hidden" name="__RSA__EXPONENT__" id="crypto-exponent" th:value="${__RSA__EXPONENT__}">
+	<input type="hidden" name="__RSA__MODULUS__" id="crypto-modulus" th:value="${RSA__MODULUS}">
+	<input type="hidden" name="__RSA__EXPONENT__" id="crypto-exponent" th:value="${RSA__EXPONENT}">
+	<input type="hidden" name="__RSA__PRIVATE__KEY__" id="crypto-pri" th:value="${RSA__PRIVATE__KEY}">
+	<input type="hidden" name="__RSA__PUBLIC__KEY__" id="crypto-pub" th:value="${RSA__PUBLIC__KEY}">
 </th:block>
 </body>
 </html>

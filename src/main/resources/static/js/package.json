@@ -3,13 +3,25 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "auto-detect": "npx webpack --watch",
+    "bundle": "npx webpack --config sec/bundle/webpack.config.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "node-rsa": "^1.1.1"
+    "assert": "^2.1.0",
+    "browser-process": "^0.0.1",
+    "constants": "^0.0.2",
+    "crypto": "^1.0.1",
+    "crypto-browserify": "^3.12.0",
+    "node-rsa": "^1.1.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "vm-browserify": "^1.1.2",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4"
   },
   "type": "module"
 }

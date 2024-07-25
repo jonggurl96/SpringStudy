@@ -6,6 +6,7 @@ window.onload = () => {
 	document.querySelector("#loginBtn").addEventListener("click", () => {
 		const modulus = document.querySelector("#crypto-modulus").value
 		const exponent = document.querySelector("#crypto-exponent").value
+
 		const elPassword = document.loginForm.password
 		elPassword.value = encrypt(elPassword.value, modulus, exponent)
 		document.loginForm.submit()

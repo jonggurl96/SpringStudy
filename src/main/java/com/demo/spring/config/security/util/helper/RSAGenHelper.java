@@ -2,8 +2,12 @@ package com.demo.spring.config.security.util.helper;
 
 
 import com.demo.spring.config.security.exception.dec.RsaGenerateException;
+import com.demo.spring.config.security.util.properties.RSAProperties;
 import com.demo.spring.config.security.util.vo.RSAVO;
+import jakarta.servlet.http.HttpSession;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ui.Model;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -11,8 +15,9 @@ import java.security.spec.InvalidKeySpecException;
 @Slf4j
 public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 	
-	public RSAGenHelper(int KEY_SIZE, int RADIX_MODULUS, int RADIX_EXPONENT, String ATTR_KEY, String ATTR_MOD, String ATTR_EXP) {
-		super(KEY_SIZE, RADIX_MODULUS, RADIX_EXPONENT, ATTR_KEY, ATTR_MOD, ATTR_EXP);
+	public RSAGenHelper(RSAProperties properties) {
+		super(properties.getKeySize(), properties.getRadixModulus(), properties.getRadixExponent(),
+		      properties.getAttrKey(), properties.getAttrMod(), properties.getAttrExp(), properties.getAttrPub());
 	}
 	
 	@Override
@@ -28,6 +33,13 @@ public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 			log.error(">>> [RSA] InvalidKeySpecException.");
 			throw new RsaGenerateException(">>> [RSA] InvalidKeySpecException.", ikse);
 		}
+	}
+	
+	@Override
+	public void setRsaWebAttr(@NonNull RSAVO rsavo, @NonNull HttpSession session, @NonNull Model model) {
+		session.setAttribute(ATTR_KEY, rsavo.privateKey());
+		model.addAttribute(ATTR_MOD, rsavo.base64Modulus());
+		model.addAttribute(ATTR_EXP, rsavo.base64Exponent());
 	}
 	
 }

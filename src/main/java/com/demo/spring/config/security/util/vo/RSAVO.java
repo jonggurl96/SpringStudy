@@ -21,7 +21,7 @@ import java.util.Base64;
  * @version 1.0.0
  * @since 24. 7. 18.
  */
-public record RSAVO(PrivateKey privateKey, String modulus, String exponent) implements DecoderVO {
+public record RSAVO(PrivateKey privateKey, String modulus, String exponent, PublicKey publicKey) implements DecoderVO {
 	
 	public static final String ALGORITHM_RSA = "RSA";
 	
@@ -62,7 +62,7 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent) impl
 		String modulus = publicKeySpec.getModulus().toString(modulusRadix);
 		String exponent = publicKeySpec.getPublicExponent().toString(exponentRadix);
 		
-		return new RSAVO(privateKey, modulus, exponent);
+		return new RSAVO(privateKey, modulus, exponent, publicKey);
 	}
 	
 	@Override

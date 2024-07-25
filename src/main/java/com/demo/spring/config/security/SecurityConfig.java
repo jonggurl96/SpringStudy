@@ -68,12 +68,10 @@ public class SecurityConfig {
 		http.formLogin(page -> page.loginPage("/login").permitAll());
 		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/actionLogin", "/login**")
-				.permitAll()
+				.requestMatchers("/actionLogin", "/login**").permitAll()
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
-				.anyRequest()
-				.authenticated());
+				.anyRequest().authenticated());
 
 		http.addFilterBefore(authenticationFilter(authenticationManager(http)), UsernamePasswordAuthenticationFilter.class);
 		

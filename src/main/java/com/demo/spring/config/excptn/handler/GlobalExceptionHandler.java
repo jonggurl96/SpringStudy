@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 		String message = ex.getMessage();
 		if(message == null || message.isBlank())
 			message = DEFAULT_ERROR_MESSAGE;
-		log.debug(">>> Global Exception Handler. ErrMsg: {}", message);
+		log.error(">>> Global Exception Handler. ErrMsg: {}", message, ex);
 		
 		ModelAndView mav = new ModelAndView(view);
 		

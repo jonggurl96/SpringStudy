@@ -26,6 +26,9 @@ spring:
         format_sql: true
         highlight_sql: true
     show-sql: true
+  config:
+    import:
+      - "classpath:/static/properties/decoder.yml"
 
 server:
   port: 8080
@@ -58,3 +61,4 @@ jwt:
 
 decoder:
   type: RSA
+

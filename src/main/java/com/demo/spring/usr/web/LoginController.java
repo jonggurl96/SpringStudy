@@ -2,6 +2,8 @@ package com.demo.spring.usr.web;
 
 
 import com.demo.spring.config.security.annotation.AuthenticationUser;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
+import com.demo.spring.config.security.util.vo.RSAVO;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
 import jakarta.servlet.http.HttpSession;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class LoginController extends AbstractController {
 	
+	private final RSAGenHelper genHelper;
+	
 	@GetMapping(value = "/login")
 	public String loginPage(Model model,
 	                        HttpSession session,
@@ -29,6 +33,9 @@ public class LoginController extends AbstractController {
 		if(code != null)
 			log.debug(">>> code: {}, errMsg: {}", code, errMsg);
 		model.addAttribute("errMsg", errMsg);
+		
+		RSAVO vo = genHelper.generate();
+		genHelper.setRsaWebAttr(vo, session, model);
 		return "/login";
 	}
 	
