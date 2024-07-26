@@ -6,6 +6,7 @@ import com.demo.spring.config.security.util.vo.RSAVO;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
@@ -20,10 +21,15 @@ public class EncryptAop {
 	private final RSAGenHelper genHelper;
 	
 	@Before(value = "@annotation(com.demo.spring.config.security.annotation.RsaEncrypt) && args(model, session, ..)", argNames = "model,session")
-	public void generateRSAVO(Model model, HttpSession session) throws Exception {
+	public void generateRSAVO(Model model, HttpSession session) {
 		RSAVO vo = genHelper.generate();
 		genHelper.setRsaWebAttr(vo, session, model);
 		log.debug(">>> RSAGenHelper generate RSAVO");
+	}
+	
+	@AfterReturning(value = "execution(public String *..LoginController.login(..)) && args(session)", argNames = "session")
+	public void removeSessionAttr(HttpSession session) {
+		genHelper.removeSessionAttr(session);
 	}
 	
 }

@@ -33,8 +33,9 @@ public class LoginController extends AbstractController {
 		return "/login";
 	}
 	
+	@SuppressWarnings({"unused"})
 	@PostMapping(value = "/actionLogin")
-	public String login() throws Exception {
+	public String login(HttpSession session) throws Exception {
 		return "/main";
 	}
 	
