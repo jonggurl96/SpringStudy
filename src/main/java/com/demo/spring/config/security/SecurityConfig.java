@@ -42,12 +42,12 @@ public class SecurityConfig {
 	public JpaDaoAuthProvider jpaDaoAuthProvider() {
 		return new JpaDaoAuthProvider(userDetailsService, bCryptPasswordEncoder());
 	}
-
+	
 	@Bean
 	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 		return http.getSharedObject(AuthenticationManagerBuilder.class)
-				.authenticationProvider(jpaDaoAuthProvider())
-				.build();
+		           .authenticationProvider(jpaDaoAuthProvider())
+		           .build();
 	}
 	
 	@Bean
@@ -72,8 +72,9 @@ public class SecurityConfig {
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
 				.anyRequest().authenticated());
-
-		http.addFilterBefore(authenticationFilter(authenticationManager(http)), UsernamePasswordAuthenticationFilter.class);
+		
+		http.addFilterBefore(authenticationFilter(authenticationManager(http)),
+		                     UsernamePasswordAuthenticationFilter.class);
 		
 		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login")));
 

@@ -9,6 +9,8 @@ window.onload = () => {
 
 		const elPassword = document.loginForm.password
 		elPassword.value = encrypt(elPassword.value, modulus, exponent)
+		console.log(elPassword.value)
+		alert(elPassword.value)
 		document.loginForm.submit()
 	})
 }

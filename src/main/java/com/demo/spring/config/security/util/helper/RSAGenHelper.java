@@ -38,7 +38,7 @@ public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 	
 	@Override
 	public void setRsaWebAttr(@NonNull RSAVO rsavo, @NonNull HttpSession session, @NonNull Model model) {
-		session.setAttribute(ATTR_KEY, rsavo.privateKey());
+		session.setAttribute(ATTR_KEY, rsavo);
 		HashMap<String, String> modelAttr = new HashMap<>(2);
 		modelAttr.put(ATTR_MOD, rsavo.base64Modulus());
 		modelAttr.put(ATTR_EXP, rsavo.base64Exponent());

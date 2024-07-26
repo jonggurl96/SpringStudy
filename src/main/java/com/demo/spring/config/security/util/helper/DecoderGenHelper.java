@@ -30,8 +30,10 @@ public abstract class DecoderGenHelper<T extends DecoderVO> {
 	
 	public abstract void setRsaWebAttr(@NonNull T t, @NonNull HttpSession session, @NonNull Model model);
 	
-	public void removeSessionAttr(HttpSession session) {
+	public DecoderVO getSessionAttr(HttpSession session) {
+		DecoderVO decoder = (DecoderVO) session.getAttribute(ATTR_KEY);
 		session.removeAttribute(ATTR_KEY);
+		return decoder;
 	}
 	
 	protected void put(Model model, String type, Map<String, String> attrMap) {

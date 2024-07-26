@@ -48,7 +48,8 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent, Publ
 		return new String(encoded, StandardCharsets.UTF_8);
 	}
 	
-	public static RSAVO generate(int keySize, int modulusRadix, int exponentRadix) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public static RSAVO generate(int keySize, int modulusRadix, int exponentRadix) throws NoSuchAlgorithmException,
+			InvalidKeySpecException {
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_RSA);
 		keyPairGenerator.initialize(keySize, new SecureRandom());
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -83,12 +84,11 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent, Publ
 		byte[] bytes = new byte[hex.length() / 2];
 		
 		for(int l = 0; l < hex.length(); l += 2) {
-			bytes[l / 2] = Byte.parseByte(hex.substring(l, l + 2), 16);
+			bytes[l / 2] = (byte) Integer.parseInt(hex.substring(l, l + 2), 16);
 		}
 		
 		return bytes;
 	}
-	
 	
 	
 }

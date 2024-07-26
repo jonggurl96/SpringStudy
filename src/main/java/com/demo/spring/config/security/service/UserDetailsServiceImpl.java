@@ -35,12 +35,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		UserDTO userDTO = new UserDTO(user);
 		List<UserAuthority> userAuthorities = userAuthorRepository.findByUserNo(userDTO.getUserNo());
 		return CustomUserDetails.builder()
-				.userDTO(userDTO)
-				.authorities(userAuthorities.stream()
-						             .map(UserAuthority::getAuthorCode)
-						             .map(SimpleGrantedAuthority::new)
-						             .collect(Collectors.toUnmodifiableList()))
-				.build();
+		                        .userDTO(userDTO)
+		                        .authorities(userAuthorities.stream()
+		                                                    .map(UserAuthority::getAuthorCode)
+		                                                    .map(SimpleGrantedAuthority::new)
+		                                                    .collect(Collectors.toUnmodifiableList()))
+		                        .build();
 	}
 	
 }

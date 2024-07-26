@@ -1,7 +1,7 @@
 package com.demo.spring.config.security.filter;
 
 
-import com.demo.spring.config.security.exception.PasswordNotMatchException;
+import com.demo.spring.config.security.exception.dec.DecryptException;
 import com.demo.spring.config.security.util.helper.DecoderGenHelper;
 import com.demo.spring.config.security.util.vo.DecoderVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +32,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		
 		Map<String, Object> credentials = new HashMap<>();
 		String password = obtainPassword(request);
-		credentials.put("password", decrypt(password));
+		credentials.put("password", decrypt(request, password));
 		
 		log.debug(">>> username: {}, password: {}", username, password);
 		
@@ -42,12 +42,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		return getAuthenticationManager().authenticate(authRequst);
 	}
 	
-	private String decrypt(String encrypted) {
-		DecoderVO decoder = genHelper.generate();
+	private String decrypt(HttpServletRequest request, String encrypted) {
+		DecoderVO decoder = genHelper.getSessionAttr(request.getSession());
 		try {
 			return decoder.decrypt(encrypted);
 		} catch(GeneralSecurityException e) {
-			throw new PasswordNotMatchException("Password Decode Error.", e);
+			log.error(">>> ", e);
+			throw new DecryptException(encrypted, e);
 		}
 	}
 	
