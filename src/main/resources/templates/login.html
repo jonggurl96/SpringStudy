@@ -11,7 +11,7 @@
 <body>
 <input type="hidden" name="contextPath" th:value="${contextPath}">
 <input type="hidden" id="errMsg" th:value="${errMsg}">
-<th:block th:replace="~{/fragments/sec/rsa :: hidden}"></th:block>
+<th:block th:replace="~{/fragments/sec/index :: crypto}"></th:block>
 <div id="section">
 	<div id="loginForm">
 		<form name="loginForm" th:action="@{/actionLogin}" method="post">

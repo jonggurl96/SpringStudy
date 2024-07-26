@@ -2,12 +2,10 @@ package com.demo.spring.usr.web;
 
 
 import com.demo.spring.config.security.annotation.AuthenticationUser;
-import com.demo.spring.config.security.util.helper.RSAGenHelper;
-import com.demo.spring.config.security.util.vo.RSAVO;
+import com.demo.spring.config.security.annotation.RsaEncrypt;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,11 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Controller
-@RequiredArgsConstructor
 public class LoginController extends AbstractController {
 	
-	private final RSAGenHelper genHelper;
-	
+	@RsaEncrypt
 	@GetMapping(value = "/login")
 	public String loginPage(Model model,
 	                        HttpSession session,
@@ -34,8 +30,6 @@ public class LoginController extends AbstractController {
 			log.debug(">>> code: {}, errMsg: {}", code, errMsg);
 		model.addAttribute("errMsg", errMsg);
 		
-		RSAVO vo = genHelper.generate();
-		genHelper.setRsaWebAttr(vo, session, model);
 		return "/login";
 	}
 	

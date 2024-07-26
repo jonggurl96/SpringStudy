@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
 
 @Slf4j
 public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
@@ -38,8 +39,10 @@ public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 	@Override
 	public void setRsaWebAttr(@NonNull RSAVO rsavo, @NonNull HttpSession session, @NonNull Model model) {
 		session.setAttribute(ATTR_KEY, rsavo.privateKey());
-		model.addAttribute(ATTR_MOD, rsavo.base64Modulus());
-		model.addAttribute(ATTR_EXP, rsavo.base64Exponent());
+		HashMap<String, String> modelAttr = new HashMap<>(2);
+		modelAttr.put(ATTR_MOD, rsavo.base64Modulus());
+		modelAttr.put(ATTR_EXP, rsavo.base64Exponent());
+		super.put(model, "RSA", modelAttr);
 	}
 	
 }

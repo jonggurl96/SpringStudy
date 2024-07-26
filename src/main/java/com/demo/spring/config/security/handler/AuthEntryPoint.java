@@ -31,7 +31,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
 	public void commence(HttpServletRequest request,
 	                     HttpServletResponse response,
 	                     AuthenticationException authException) throws IOException, ServletException {
-		log.error(">>> AuthEntryPoint sendRedirect(\"{}\")", targetUrl, authException);
+		log.error(">>> AuthEntryPoint sendRedirect(\"{}\")", targetUrl);
 		response.sendRedirect(targetUrl);
 	}
 	

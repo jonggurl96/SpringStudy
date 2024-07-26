@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 
+import java.util.Map;
+
 @Slf4j
 @RequiredArgsConstructor
 public abstract class DecoderGenHelper<T extends DecoderVO> {
@@ -27,6 +29,11 @@ public abstract class DecoderGenHelper<T extends DecoderVO> {
 	protected final String ATTR_PUB;
 	
 	public abstract void setRsaWebAttr(@NonNull T t, @NonNull HttpSession session, @NonNull Model model);
+	
+	protected void put(Model model, String type, Map<String, String> attrMap) {
+		model.addAttribute("encType", type);
+		model.addAttribute("encAttr", attrMap);
+	}
 	
 	public T generate() {
 		return generate(KEY_SIZE, RADIX_MODULUS, RADIX_EXPONENT);
