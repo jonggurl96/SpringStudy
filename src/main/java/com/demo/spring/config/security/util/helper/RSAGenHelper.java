@@ -16,15 +16,26 @@ import java.util.HashMap;
 @Slf4j
 public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 	
+	private final int RADIX_MODULUS;
+	
+	private final int RADIX_EXPONENT;
+	
+	private final String ATTR_MOD;
+	
+	private final String ATTR_EXP;
+	
 	public RSAGenHelper(RSAProperties properties) {
-		super(properties.getKeySize(), properties.getRadixModulus(), properties.getRadixExponent(),
-		      properties.getAttrKey(), properties.getAttrMod(), properties.getAttrExp(), properties.getAttrPub());
+		super(properties.getKeySize(), properties.getAttrKey());
+		RADIX_MODULUS = properties.getRadixModulus();
+		RADIX_EXPONENT = properties.getRadixExponent();
+		ATTR_MOD = properties.getAttrMod();
+		ATTR_EXP = properties.getAttrExp();
 	}
 	
 	@Override
-	public RSAVO generate(int rsaKeySize, int rsaRadixModulus, int rsaRadixExponent) {
+	public RSAVO generate(int rsaKeySize) {
 		try {
-			RSAVO rsavo = RSAVO.generate(rsaKeySize, rsaRadixModulus, rsaRadixExponent);
+			RSAVO rsavo = RSAVO.generate(rsaKeySize, RADIX_MODULUS, RADIX_EXPONENT);
 			log.debug(">>> Decoder Record RSAVO Generated.\n{}", rsavo);
 			return rsavo;
 		} catch(NoSuchAlgorithmException ignored) {
@@ -37,12 +48,17 @@ public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 	}
 	
 	@Override
-	public void setRsaWebAttr(@NonNull RSAVO rsavo, @NonNull HttpSession session, @NonNull Model model) {
+	public void setWebAttr(@NonNull RSAVO rsavo, @NonNull HttpSession session, @NonNull Model model) {
 		session.setAttribute(ATTR_KEY, rsavo);
 		HashMap<String, String> modelAttr = new HashMap<>(2);
 		modelAttr.put(ATTR_MOD, rsavo.base64Modulus());
 		modelAttr.put(ATTR_EXP, rsavo.base64Exponent());
 		super.put(model, "RSA", modelAttr);
+	}
+	
+	@Override
+	public RSAVO getSessionAttr(HttpSession session) {
+		return (RSAVO) super.getSessionAttr(session);
 	}
 	
 }

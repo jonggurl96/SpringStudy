@@ -59,6 +59,3 @@ jwt:
     prefix: Bearer
     header: Authorization
 
-decoder:
-  type: RSA
-

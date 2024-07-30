@@ -22,6 +22,4 @@ public class RSAProperties {
 	
 	private String attrKey;
 	
-	private String attrPub;
-	
 }

@@ -16,19 +16,9 @@ public abstract class DecoderGenHelper<T extends DecoderVO> {
 	
 	protected final int KEY_SIZE;
 	
-	protected final int RADIX_MODULUS;
-	
-	protected final int RADIX_EXPONENT;
-	
 	protected final String ATTR_KEY;
 	
-	protected final String ATTR_MOD;
-	
-	protected final String ATTR_EXP;
-	
-	protected final String ATTR_PUB;
-	
-	public abstract void setRsaWebAttr(@NonNull T t, @NonNull HttpSession session, @NonNull Model model);
+	public abstract void setWebAttr(@NonNull T t, @NonNull HttpSession session, @NonNull Model model);
 	
 	public DecoderVO getSessionAttr(HttpSession session) {
 		DecoderVO decoder = (DecoderVO) session.getAttribute(ATTR_KEY);
@@ -42,9 +32,9 @@ public abstract class DecoderGenHelper<T extends DecoderVO> {
 	}
 	
 	public T generate() {
-		return generate(KEY_SIZE, RADIX_MODULUS, RADIX_EXPONENT);
+		return generate(KEY_SIZE);
 	}
 	
-	protected abstract T generate(int rsaKeySize, int rsaRadixModulus, int rsaRadixExponent);
+	protected abstract T generate(int rsaKeySize);
 	
 }

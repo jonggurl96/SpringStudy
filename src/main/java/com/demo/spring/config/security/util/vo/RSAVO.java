@@ -1,6 +1,8 @@
 package com.demo.spring.config.security.util.vo;
 
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -9,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
 
 /**
  * RSAVO.java
@@ -21,43 +22,29 @@ import java.util.Base64;
  * @version 1.0.0
  * @since 24. 7. 18.
  */
+@Slf4j
 public record RSAVO(PrivateKey privateKey, String modulus, String exponent, PublicKey publicKey) implements DecoderVO {
 	
-	public static final String ALGORITHM_RSA = "RSA";
+	public static final String ALGORITHM = "RSA";
 	
-	public byte[] getBModulus() {
-		return modulus.getBytes();
-	}
-	
-	public byte[] getBExponent() {
-		return exponent.getBytes();
-	}
-	
-	@Override
 	public String base64Modulus() {
-		return base64EncodeToString(getBModulus());
+		return base64EncodeToString(modulus.getBytes());
 	}
 	
-	@Override
 	public String base64Exponent() {
-		return base64EncodeToString(getBExponent());
-	}
-	
-	private String base64EncodeToString(byte[] bytes) {
-		byte[] encoded = Base64.getEncoder().encode(bytes);
-		return new String(encoded, StandardCharsets.UTF_8);
+		return base64EncodeToString(exponent.getBytes());
 	}
 	
 	public static RSAVO generate(int keySize, int modulusRadix, int exponentRadix) throws NoSuchAlgorithmException,
 			InvalidKeySpecException {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM_RSA);
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
 		keyPairGenerator.initialize(keySize, new SecureRandom());
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
 		
 		PublicKey publicKey = keyPair.getPublic();
 		PrivateKey privateKey = keyPair.getPrivate();
 		
-		KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM_RSA);
+		KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
 		
 		RSAPublicKeySpec publicKeySpec = keyFactory.getKeySpec(publicKey, RSAPublicKeySpec.class);
 		String modulus = publicKeySpec.getModulus().toString(modulusRadix);
@@ -70,25 +57,18 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent, Publ
 	public String decrypt(String encrypted) throws NoSuchPaddingException,
 			NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		
-		Cipher cipher = Cipher.getInstance(ALGORITHM_RSA);
+		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.DECRYPT_MODE, privateKey);
 		byte[] decrypted = cipher.doFinal(hexToBytes(encrypted));
 		return new String(decrypted, StandardCharsets.UTF_8);
 	}
 	
-	private byte[] hexToBytes(String hex) {
-		if(hex == null || hex.isEmpty() || hex.length() % 2 != 0) {
-			return new byte[]{};
-		}
-		
-		byte[] bytes = new byte[hex.length() / 2];
-		
-		for(int l = 0; l < hex.length(); l += 2) {
-			bytes[l / 2] = (byte) Integer.parseInt(hex.substring(l, l + 2), 16);
-		}
-		
-		return bytes;
+	public String encrypt(String text) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException {
+		Cipher cipher = Cipher.getInstance(ALGORITHM);
+		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+		byte[] encrypted = cipher.doFinal(text.getBytes(StandardCharsets.UTF_8));
+		return new String(encrypted, StandardCharsets.UTF_8);
 	}
-	
 	
 }

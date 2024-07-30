@@ -2,10 +2,11 @@ package com.demo.spring.config.security.filter;
 
 
 import com.demo.spring.config.security.exception.dec.DecryptException;
-import com.demo.spring.config.security.util.helper.DecoderGenHelper;
-import com.demo.spring.config.security.util.vo.DecoderVO;
+import com.demo.spring.config.security.util.helper.AESGenHelper;
+import com.demo.spring.config.security.util.vo.AESVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
-	private final DecoderGenHelper<? extends DecoderVO> genHelper;
+	private final AESGenHelper aesHelper;
 	
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -32,23 +33,25 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		
 		Map<String, Object> credentials = new HashMap<>();
 		String password = obtainPassword(request);
-		credentials.put("password", decrypt(request, password));
+		credentials.put("password", decrypt(request.getSession(), password));
 		
 		log.debug(">>> username: {}, password: {}", username, password);
 		
-		UsernamePasswordAuthenticationToken authRequst = new UsernamePasswordAuthenticationToken(username, credentials);
+		UsernamePasswordAuthenticationToken authRequst = new UsernamePasswordAuthenticationToken(username,
+		                                                                                         credentials);
 		setDetails(request, authRequst);
 		log.debug(">>> authRequest: {}", authRequst);
 		return getAuthenticationManager().authenticate(authRequst);
 	}
 	
-	private String decrypt(HttpServletRequest request, String encrypted) {
-		DecoderVO decoder = genHelper.getSessionAttr(request.getSession());
+	private String decrypt(HttpSession session, String encrypted) {
+		AESVO aesvo = aesHelper.getSessionAttr(session);
+		
 		try {
-			return decoder.decrypt(encrypted);
+			return aesvo.decrypt(encrypted);
 		} catch(GeneralSecurityException e) {
-			log.error(">>> ", e);
-			throw new DecryptException(encrypted, e);
+			log.error(">>> decrypt failed.", e);
+			throw new DecryptException("복호화에 실패했습니다.", e);
 		}
 	}
 	

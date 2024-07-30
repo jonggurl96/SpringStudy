@@ -6,7 +6,9 @@ import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.LoginFailureHandler;
 import com.demo.spring.config.security.handler.LoginSuccessHandler;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
+import com.demo.spring.config.security.util.helper.AESGenHelper;
 import com.demo.spring.config.security.util.helper.DecoderGenHelper;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.DecoderVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +33,9 @@ public class SecurityConfig {
 	
 	private final UserDetailsService userDetailsService;
 	
-	private final DecoderGenHelper<? extends DecoderVO> genHelper;
+	private final RSAGenHelper rsaHelper;
+	
+	private final AESGenHelper aesHelper;
 	
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -52,7 +56,7 @@ public class SecurityConfig {
 	
 	@Bean
 	public AuthenticationFilter authenticationFilter(AuthenticationManager authenticationManager) throws Exception {
-		AuthenticationFilter filter = new AuthenticationFilter(genHelper);
+		AuthenticationFilter filter = new AuthenticationFilter(aesHelper);
 		filter.setFilterProcessesUrl("/actionLogin");
 		filter.setAuthenticationManager(authenticationManager);
 		filter.setAuthenticationSuccessHandler(loginSuccessHandler());

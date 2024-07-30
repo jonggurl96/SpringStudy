@@ -2,8 +2,13 @@ decoder:
   rsa:
     attr-mod: RSA__MODULUS
     attr-exp: RSA__EXPONENT
-    attr-key: RSA__PRIVATE__KEY
-    attr-pub: RSA__PUBLIC__KEY
+    attr-key: RSA__KEY
     key-size: 2048
     radix-modulus: 16
     radix-exponent: 16
+  aes:
+    attr-iv: AES__IV
+    attr-key: AES__KEY
+    attr-salt: AES__SALT
+    key-size: 32
+    salt: SpringBoot_3.3.1

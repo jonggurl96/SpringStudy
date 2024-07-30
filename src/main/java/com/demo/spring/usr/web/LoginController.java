@@ -2,7 +2,7 @@ package com.demo.spring.usr.web;
 
 
 import com.demo.spring.config.security.annotation.AuthenticationUser;
-import com.demo.spring.config.security.annotation.RsaEncrypt;
+import com.demo.spring.config.security.annotation.HybridEncrypt;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
 import jakarta.servlet.http.HttpSession;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LoginController extends AbstractController {
 	
-	@RsaEncrypt
+	@HybridEncrypt
 	@GetMapping(value = "/login")
 	public String loginPage(Model model,
 	                        HttpSession session,
