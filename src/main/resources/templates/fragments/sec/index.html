@@ -7,8 +7,11 @@
 <body>
 
 <th:block th:fragment="crypto">
-	<th:block th:if="${#strings.equalsIgnoreCase(encType, 'RSA')}">
+	<th:block th:if="${#lists.contains(encTypes, 'RSA')}">
 		<th:block th:replace="~{/fragments/sec/crypto/rsa :: hidden}"></th:block>
+	</th:block>
+	<th:block th:if="${#lists.contains(encTypes, 'AES')}">
+		<th:block th:replace="~{/fragments/sec/crypto/aes :: hidden}"></th:block>
 	</th:block>
 </th:block>
 

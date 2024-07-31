@@ -7,4 +7,10 @@ import NodeRSA from 'node-rsa';
 		return rsa.encrypt(text, 'hex', 'utf8')
 	}
 
+	window.decrypt = (text, modulus, exponent) => {
+		const rsa = new NodeRSA({ b: 2048 })
+		rsa.keyPair.setPublic(atob(modulus), atob(exponent))
+		return rsa.decrypt(text, 'utf8')
+	}
+
 })(window);

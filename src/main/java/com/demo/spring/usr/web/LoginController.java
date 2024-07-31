@@ -3,9 +3,12 @@ package com.demo.spring.usr.web;
 
 import com.demo.spring.config.security.annotation.AuthenticationUser;
 import com.demo.spring.config.security.annotation.HybridEncrypt;
+import com.demo.spring.config.security.util.helper.AESGenHelper;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +18,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 public class LoginController extends AbstractController {
+	
+	private final RSAGenHelper rsaGenHelper;
+	
+	private final AESGenHelper aesGenHelper;
 	
 	@HybridEncrypt
 	@GetMapping(value = "/login")
@@ -33,9 +41,10 @@ public class LoginController extends AbstractController {
 		return "/login";
 	}
 	
-	@SuppressWarnings({"unused"})
 	@PostMapping(value = "/actionLogin")
 	public String login(HttpSession session) throws Exception {
+		session.removeAttribute(rsaGenHelper.getATTR_KEY());
+		session.removeAttribute(aesGenHelper.getATTR_KEY());
 		return "/main";
 	}
 	

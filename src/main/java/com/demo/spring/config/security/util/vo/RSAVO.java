@@ -58,17 +58,41 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent, Publ
 			NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
-		cipher.init(Cipher.DECRYPT_MODE, privateKey);
+		cipher.init(Cipher.DECRYPT_MODE, publicKey);
 		byte[] decrypted = cipher.doFinal(hexToBytes(encrypted));
 		return new String(decrypted, StandardCharsets.UTF_8);
 	}
 	
 	public String encrypt(String text) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException {
+		return new String(encryptByte(text.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+	}
+	
+	public String decrypt64(String encrypted) throws NoSuchPaddingException, IllegalBlockSizeException,
+			NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+		return base64EncodeToString(decrypt(encrypted).getBytes(StandardCharsets.UTF_8));
+	}
+	
+	public String encrypt64(String text) throws NoSuchPaddingException, IllegalBlockSizeException,
+			NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+		return base64EncodeToString(encryptByte(text.getBytes(StandardCharsets.UTF_8)));
+	}
+	
+	public String encryptB(byte[] bytes) throws NoSuchPaddingException, NoSuchAlgorithmException,
+			IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+		return new String(encryptByte(bytes), StandardCharsets.UTF_8);
+	}
+	
+	public String encryptB64(byte[] bytes) throws NoSuchPaddingException, IllegalBlockSizeException,
+			NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+		return base64EncodeToString(encryptByte(bytes));
+	}
+	
+	private byte[] encryptByte(byte[] bytes) throws NoSuchPaddingException, NoSuchAlgorithmException,
+			InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher cipher = Cipher.getInstance(ALGORITHM);
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-		byte[] encrypted = cipher.doFinal(text.getBytes(StandardCharsets.UTF_8));
-		return new String(encrypted, StandardCharsets.UTF_8);
+		return cipher.doFinal(bytes);
 	}
 	
 }

@@ -29,7 +29,8 @@ public class EncryptAop {
 	
 	private final AESGenHelper aesHelper;
 	
-	@Before(value = "@annotation(com.demo.spring.config.security.annotation.HybridEncrypt) && args(model, session, ..)"
+	@Before(
+			value = "@annotation(com.demo.spring.config.security.annotation.HybridEncrypt) && args(model, session, ..)"
 			, argNames = "model,session")
 	public void generateRSAVO(Model model, HttpSession session) throws NoSuchPaddingException,
 			IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
@@ -39,7 +40,9 @@ public class EncryptAop {
 		rsaHelper.setWebAttr(rsa, session, model);
 		aesHelper.setWebAttr(aes, session, model);
 		
-		String encryptedSecretKey = rsa.encrypt(aes.privateKey());
+		String encryptedSecretKey = rsa.encrypt64(aes.secretKeyString());
+		
+		log.debug(">>> secret key: {}, encrypted: {}", aes.secretKeyString(), encryptedSecretKey);
 		model.addAttribute("SECRET_KEY", encryptedSecretKey);
 	}
 	

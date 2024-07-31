@@ -4,7 +4,7 @@ import webpack from "webpack";
 const __dirname = import.meta.dirname
 
 export default {
-	entry: "./sec/rsa.js",
+	entry: "./sec/security.js",
 	output: {
 		path: resolve(__dirname, "dist"),
 		filename: "index.js"

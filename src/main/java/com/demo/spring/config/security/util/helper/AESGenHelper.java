@@ -8,8 +8,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 
-import java.util.HashMap;
-
 @Slf4j
 public class AESGenHelper extends DecoderGenHelper<AESVO> {
 	
@@ -29,10 +27,9 @@ public class AESGenHelper extends DecoderGenHelper<AESVO> {
 	@Override
 	public void setWebAttr(@NonNull AESVO aesvo, @NonNull HttpSession session, @NonNull Model model) {
 		session.setAttribute(ATTR_KEY, aesvo);
-		HashMap<String, String> modelAttr = new HashMap<>(2);
-		modelAttr.put(ATTR_IV, aesvo.base64Iv());
-		modelAttr.put(ATTR_SALT, aesvo.base64Salt());
-		super.put(model, "AES", modelAttr);
+		model.addAttribute(ATTR_IV, aesvo.base64Iv());
+		model.addAttribute(ATTR_SALT, aesvo.base64Salt());
+		addType(model, "AES");
 	}
 	
 	@Override

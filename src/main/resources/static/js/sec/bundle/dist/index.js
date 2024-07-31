@@ -2643,14 +2643,14 @@ eval("\n\nvar possibleNames = __webpack_require__(/*! possible-typed-array-names
 
 /***/ }),
 
-/***/ "./sec/rsa.js":
-/*!********************!*\
-  !*** ./sec/rsa.js ***!
-  \********************/
+/***/ "./sec/security.js":
+/*!*************************!*\
+  !*** ./sec/security.js ***!
+  \*************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var node_rsa__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! node-rsa */ \"./node_modules/node-rsa/src/NodeRSA.js\");\n\r\n\r\n(function(window) {\r\n\twindow.encrypt = (text, modulus, exponent) => {\r\n\t\tconst rsa = new node_rsa__WEBPACK_IMPORTED_MODULE_0__({ b: 2048 })\r\n\t\trsa.keyPair.setPublic(atob(modulus), atob(exponent))\r\n\t\treturn rsa.encrypt(text, 'hex', 'utf8')\r\n\t}\r\n\r\n})(window);\n\n//# sourceURL=webpack://js/./sec/rsa.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var node_rsa__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! node-rsa */ \"./node_modules/node-rsa/src/NodeRSA.js\");\n/* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! crypto */ \"./node_modules/crypto-browserify/index.js\");\n\r\n\r\n\r\nconst aesAlgorithmName = 'aes-256-cbc';\r\n\r\nfunction getRsa(bitsize, modulus, exponent) {\r\n\tconst rsa = new node_rsa__WEBPACK_IMPORTED_MODULE_0__({ b: bitsize });\r\n\trsa.keyPair.setPublic(atob(modulus), atob(exponent));\r\n\treturn rsa;\r\n}\r\n\r\nfunction base64(selector) {\r\n\treturn atob(document.querySelector(selector).value);\r\n}\r\n\r\nfunction encryptWithRsa(text, modulus, exponent) {\r\n\treturn getRsa(2048, modulus, exponent).encrypt(text, 'hex', 'utf8');\r\n}\r\n\r\nfunction decryptWithRsa(text, modulus, exponent) {\r\n\treturn getRsa(2048, modulus, exponent).decrypt(text, 'utf8');\r\n}\r\n\r\nfunction decryptWithAes(text, decodedKey) {\r\n\tconst salt = base64(\"#aes-salt\");\r\n\r\n\t// 더 강력한 암호화를 위해 사용하는 초기화 벡터\r\n\tconst iv = base64(\"#aes-iv\");\r\n\r\n\tconst scryptedKey = crypto__WEBPACK_IMPORTED_MODULE_1__.scryptSync(decodedKey, salt, 32);\r\n\tconst cipher = crypto__WEBPACK_IMPORTED_MODULE_1__.createCipheriv(aesAlgorithmName, scryptedKey, iv);\r\n\r\n\tlet result = cipher.update(text, 'utf8', 'base64');\r\n\tresult += cipher.final('base64');\r\n\treturn result;\r\n}\r\n\r\nfunction hybridEncrypt(text, modulus, exponent) {\r\n\tconst key = base64(\"#aes-secret-key\");\r\n\tconst decodedKey = decryptWithRsa(key, modulus, exponent);\r\n\tconsole.log(key)\r\n\tconsole.log(decodedKey)\r\n\treturn decryptWithAes(text, decodedKey);\r\n}\r\n\r\n(function(window) {\r\n\r\n\twindow.rsaEncrypt = encryptWithRsa;\r\n\r\n\twindow.rsaDecrypt = decryptWithRsa;\r\n\r\n\twindow.aesDecrypt = decryptWithAes;\r\n\r\n\twindow.encryption = hybridEncrypt;\r\n})(window);\n\n//# sourceURL=webpack://js/./sec/security.js?");
 
 /***/ }),
 
@@ -2787,7 +2787,7 @@ eval("module.exports = /*#__PURE__*/JSON.parse('{\"2.16.840.1.101.3.4.1.1\":\"ae
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./sec/rsa.js");
+/******/ 	var __webpack_exports__ = __webpack_require__("./sec/security.js");
 /******/ 	
 /******/ })()
 ;
