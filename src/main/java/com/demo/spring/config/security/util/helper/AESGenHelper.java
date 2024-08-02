@@ -13,35 +13,27 @@ public class AESGenHelper extends DecoderGenHelper<AESVO> {
 	
 	private final String ATTR_IV;
 	
-	private final String ATTR_SALT;
-	
-	private final String SALT;
-	
 	public AESGenHelper(AESProperties properties) {
 		super(properties.getKeySize(), properties.getAttrKey());
 		ATTR_IV = properties.getAttrIv();
-		ATTR_SALT = properties.getAttrSalt();
-		SALT = properties.getSalt();
 	}
 	
 	@Override
 	public void setWebAttr(@NonNull AESVO aesvo, @NonNull HttpSession session, @NonNull Model model) {
-		session.setAttribute(ATTR_KEY, aesvo);
 		model.addAttribute(ATTR_IV, aesvo.base64Iv());
-		model.addAttribute(ATTR_SALT, aesvo.base64Salt());
 		addType(model, "AES");
 	}
 	
 	@Override
 	protected AESVO generate(int rsaKeySize) {
-		AESVO vo = AESVO.generate(rsaKeySize, SALT);
+		AESVO vo = AESVO.generate();
 		log.debug(">>> Decoder Record AESVO Generated.\n{}", vo);
+		log.debug(">>> AESVO Initial Vector: {}", vo.iv().getIV());
 		return vo;
 	}
 	
-	@Override
-	public AESVO getSessionAttr(HttpSession session) {
-		return (AESVO) super.getSessionAttr(session);
+	public AESVO generateWithKey(String key) {
+		return AESVO.generate(key);
 	}
 	
 }

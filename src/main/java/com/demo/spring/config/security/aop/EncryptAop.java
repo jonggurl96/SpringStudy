@@ -39,11 +39,6 @@ public class EncryptAop {
 		
 		rsaHelper.setWebAttr(rsa, session, model);
 		aesHelper.setWebAttr(aes, session, model);
-		
-		String encryptedSecretKey = rsa.encrypt64(aes.secretKeyString());
-		
-		log.debug(">>> secret key: {}, encrypted: {}", aes.secretKeyString(), encryptedSecretKey);
-		model.addAttribute("SECRET_KEY", encryptedSecretKey);
 	}
 	
 }

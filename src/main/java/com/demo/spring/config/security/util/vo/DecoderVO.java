@@ -30,8 +30,6 @@ public interface DecoderVO {
 		return bytes;
 	}
 	
-	public abstract String decrypt(String encrypted) throws NoSuchPaddingException,
-			NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-			InvalidAlgorithmParameterException;
+	public abstract String decrypt(String encrypted);
 	
 }

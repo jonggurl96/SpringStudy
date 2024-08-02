@@ -3,51 +3,34 @@ import crypto from "crypto";
 
 const aesAlgorithmName = 'aes-256-cbc';
 
-function getRsa(bitsize, modulus, exponent) {
-	const rsa = new NodeRSA({ b: bitsize });
-	rsa.keyPair.setPublic(atob(modulus), atob(exponent));
-	return rsa;
-}
+/**
+ * <pre>
+ *     1. AES 키 생성
+ *     2. 패스워드 AES 암호화
+ *     3. RSA 공개키 생성
+ *     4. AES 키 암호화
+ *     5. 패스워드 값 변경: [암호화한 패스워드]|_|_|[암호화한 AES 비밀키]
+ * </pre>
+ * @param rsaOptions
+ * @param aesOptions
+ */
+function hybridEncrypt(rsaOptions, aesOptions) {
+	const SECRET_KEY = crypto.randomBytes(aesOptions.keySizeByte);
+	const INITIAL_VECTOR = Buffer.from(aesOptions.iv, 'base64');
 
-function base64(selector) {
-	return atob(document.querySelector(selector).value);
-}
+	console.log(INITIAL_VECTOR)
 
-function encryptWithRsa(text, modulus, exponent) {
-	return getRsa(2048, modulus, exponent).encrypt(text, 'hex', 'utf8');
-}
+	const cipher = crypto.createCipheriv(aesAlgorithmName, SECRET_KEY, INITIAL_VECTOR);
 
-function decryptWithRsa(text, modulus, exponent) {
-	return getRsa(2048, modulus, exponent).decrypt(text, 'utf8');
-}
+	const encrypted64 = cipher.update(aesOptions.text, 'utf8', 'base64') + cipher.final('base64');
 
-function decryptWithAes(text, decodedKey) {
-	const salt = base64("#aes-salt");
+	const rsa = new NodeRSA({ b: rsaOptions.keySizeBit });
+	rsa.keyPair.setPublic(atob(rsaOptions.modulus), atob(rsaOptions.exponent));
+	const encryptedSecret = rsa.encrypt(SECRET_KEY, 'base64', 'buffer');
 
-	// 더 강력한 암호화를 위해 사용하는 초기화 벡터
-	const iv = base64("#aes-iv");
-
-	const scryptedKey = crypto.scryptSync(decodedKey, salt, 32);
-	const cipher = crypto.createCipheriv(aesAlgorithmName, scryptedKey, iv);
-
-	let result = cipher.update(text, 'utf8', 'base64');
-	result += cipher.final('base64');
-	return result;
-}
-
-function hybridEncrypt(text, modulus, exponent) {
-	const key = base64("#aes-secret-key");
-	const decodedKey = decryptWithRsa(key, modulus, exponent);
-	return decryptWithAes(text, decodedKey);
+	return `${encrypted64}--==AES==--${encryptedSecret}`;
 }
 
 (function(window) {
-
-	window.rsaEncrypt = encryptWithRsa;
-
-	window.rsaDecrypt = decryptWithRsa;
-
-	window.aesDecrypt = decryptWithAes;
-
 	window.encryption = hybridEncrypt;
 })(window);

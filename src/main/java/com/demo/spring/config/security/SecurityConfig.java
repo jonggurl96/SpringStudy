@@ -6,10 +6,7 @@ import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.LoginFailureHandler;
 import com.demo.spring.config.security.handler.LoginSuccessHandler;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
-import com.demo.spring.config.security.util.helper.AESGenHelper;
-import com.demo.spring.config.security.util.helper.DecoderGenHelper;
-import com.demo.spring.config.security.util.helper.RSAGenHelper;
-import com.demo.spring.config.security.util.vo.DecoderVO;
+import com.demo.spring.sec.crypto.EncUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -33,9 +30,7 @@ public class SecurityConfig {
 	
 	private final UserDetailsService userDetailsService;
 	
-	private final RSAGenHelper rsaHelper;
-	
-	private final AESGenHelper aesHelper;
+	private final EncUtil encUtil;
 	
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -44,7 +39,7 @@ public class SecurityConfig {
 	
 	@Bean
 	public JpaDaoAuthProvider jpaDaoAuthProvider() {
-		return new JpaDaoAuthProvider(userDetailsService, bCryptPasswordEncoder());
+		return new JpaDaoAuthProvider(userDetailsService, encUtil, bCryptPasswordEncoder());
 	}
 	
 	@Bean
@@ -56,7 +51,7 @@ public class SecurityConfig {
 	
 	@Bean
 	public AuthenticationFilter authenticationFilter(AuthenticationManager authenticationManager) throws Exception {
-		AuthenticationFilter filter = new AuthenticationFilter(aesHelper);
+		AuthenticationFilter filter = new AuthenticationFilter(encUtil);
 		filter.setFilterProcessesUrl("/actionLogin");
 		filter.setAuthenticationManager(authenticationManager);
 		filter.setAuthenticationSuccessHandler(loginSuccessHandler());

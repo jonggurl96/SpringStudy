@@ -63,7 +63,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 			case DecryptException de -> {
 				String encodedPassword = de.getMessage();
 				setForPwdNotMatch(request, "패스워드 복호화에 실패했습니다.");
-				log.error(">>> {}", encodedPassword);
+				log.error(">>> {}", encodedPassword, de);
 			}
 			default -> setForUnknown(request, "로그인 처리중 문제가 발생하였습니다.");
 		}

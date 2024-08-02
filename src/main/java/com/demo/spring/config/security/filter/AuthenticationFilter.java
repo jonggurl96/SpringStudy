@@ -1,9 +1,7 @@
 package com.demo.spring.config.security.filter;
 
 
-import com.demo.spring.config.security.exception.dec.DecryptException;
-import com.demo.spring.config.security.util.helper.AESGenHelper;
-import com.demo.spring.config.security.util.vo.AESVO;
+import com.demo.spring.sec.crypto.EncUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -14,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
-	private final AESGenHelper aesHelper;
+	private final EncUtil encUtil;
 	
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -33,7 +30,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		
 		Map<String, Object> credentials = new HashMap<>();
 		String password = obtainPassword(request);
-		credentials.put("password", decrypt(request.getSession(), password));
+		password = password == null ? "" : password;
+		
+		String decodedPassword = decrypt(request.getSession(), password);
+		log.debug(">>> Decoded Password. {}", decodedPassword);
+		credentials.put("password", decodedPassword);
 		
 		log.debug(">>> username: {}, password: {}", username, password);
 		
@@ -45,14 +46,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	}
 	
 	private String decrypt(HttpSession session, String encrypted) {
-		AESVO aesvo = aesHelper.getSessionAttr(session);
-		
-		try {
-			return aesvo.decrypt(encrypted);
-		} catch(GeneralSecurityException e) {
-			log.error(">>> decrypt failed.", e);
-			throw new DecryptException("복호화에 실패했습니다.", e);
-		}
+		encUtil.setSession(session);
+		return encUtil.decrypt(encrypted);
 	}
 	
 }
