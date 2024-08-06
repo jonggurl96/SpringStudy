@@ -8,12 +8,10 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 
 /**
@@ -27,11 +25,12 @@ import java.security.spec.RSAPublicKeySpec;
  * @since 24. 7. 18.
  */
 @Slf4j
-public record RSAVO(PrivateKey privateKey, String modulus, String exponent) implements DecoderVO {
+public record RSAVO(PrivateKey privateKey, PublicKey publicKey, String modulus, String exponent,
+                    String priExp) implements CryptoVO {
 	
 	public static final String ALGORITHM = "RSA";
 	
-	public static final String ALGORITHM_FULL = "RSA/ECB/OAEPPadding";
+	public static final String ALGORITHM_FULL = "RSA/ECB/PKCS1Padding";
 	
 	public String base64Modulus() {
 		return base64EncodeToString(modulus.getBytes());
@@ -39,6 +38,10 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent) impl
 	
 	public String base64Exponent() {
 		return base64EncodeToString(exponent.getBytes());
+	}
+	
+	public String base64PriExp() {
+		return base64EncodeToString(priExp.getBytes());
 	}
 	
 	public static RSAVO generate(int keySize, int modulusRadix, int exponentRadix) throws NoSuchAlgorithmException,
@@ -56,27 +59,27 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent) impl
 		String modulus = publicKeySpec.getModulus().toString(modulusRadix);
 		String exponent = publicKeySpec.getPublicExponent().toString(exponentRadix);
 		
-		return new RSAVO(privateKey, modulus, exponent);
+		String priExp = ((RSAPrivateKey) privateKey).getPrivateExponent().toString(modulusRadix);
+		
+		return new RSAVO(privateKey, publicKey, modulus, exponent, priExp);
 	}
 	
 	@Override
-	public String decrypt(String encrypted) {
+	public String crypt(int cryptMode, String text) {
 		try {
 			Cipher cipher = Cipher.getInstance(ALGORITHM_FULL);
-			OAEPParameterSpec oaepParameterSpec = new OAEPParameterSpec("SHA-256", "MGF1",
-			                                                            new MGF1ParameterSpec("SHA-256"),
-			                                                            PSource.PSpecified.DEFAULT);
 			
-			cipher.init(Cipher.DECRYPT_MODE, privateKey, oaepParameterSpec);
+			Key key = cryptMode == Cipher.ENCRYPT_MODE ? privateKey : publicKey;
 			
-			log.debug(">>> Algorithm. {}", cipher.getAlgorithm());
-			log.debug(">>> Provider. {}", cipher.getProvider().toString());
-			log.debug(">>> Parameters. {}", cipher.getParameters());
+			cipher.init(cryptMode, key);
 			
+			byte[] bytes = cryptMode == Cipher.DECRYPT_MODE ? base64Decode(text)
+			                                                : text.getBytes(StandardCharsets.UTF_8);
 			
+			byte[] decrypted = cipher.doFinal(bytes);
 			
-			byte[] decrypted = cipher.doFinal(hexToBytes(encrypted));
-			return new String(decrypted, StandardCharsets.UTF_8);
+			return cryptMode == Cipher.ENCRYPT_MODE ? base64EncodeToString(decrypted)
+			                                        : new String(decrypted, StandardCharsets.UTF_8);
 		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
 			throw new DecryptException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
 		} catch(InvalidKeyException ike) {
@@ -85,8 +88,6 @@ public record RSAVO(PrivateKey privateKey, String modulus, String exponent) impl
 			throw new DecryptException("Block Size가 잘못 지정되었습니다.", ibe);
 		} catch(BadPaddingException bpe) {
 			throw new DecryptException("Padding이 잘못되었습니다.", bpe);
-		} catch(InvalidAlgorithmParameterException iape) {
-			throw new DecryptException("ParameterSpec이 잘못되었습니다.", iape);
 		}
 	}
 	

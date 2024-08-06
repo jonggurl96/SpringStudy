@@ -2,6 +2,7 @@ decoder:
   rsa:
     attr-mod: RSA__MODULUS
     attr-exp: RSA__EXPONENT
+    attr-pri-exp: RSA__PRIEXP
     attr-key: RSA__KEY
     key-size: 2048
     radix-modulus: 16

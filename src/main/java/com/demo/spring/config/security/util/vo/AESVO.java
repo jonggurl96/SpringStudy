@@ -14,13 +14,14 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-public record AESVO(String secretKeyString, IvParameterSpec iv) implements DecoderVO {
-	
-	public static final String ALGORITHM_FULL = "AES/CBC/PKCS5Padding";
+public record AESVO(SecretKeySpec key, IvParameterSpec iv) implements CryptoVO {
 	
 	public static final String ALGORITHM = "AES";
 	
-	private static final String KEY = "AESVO_ENCRYPTION__DECRYPTION_KEY";
+	/**
+	 * AESVO_ENCRYPTION__DECRYPTION_KEY MD5 HASHING f3ab59b339c6a34d2c58b78a0d33a5d9
+	 */
+	public static final String KEY = "f3ab59b339c6a34d2c58b78a0d33a5d9";
 	
 	/**
 	 * _INITIAL_VECTOR_ MD5 HASHING 84a82539b0e2e85d954faaa84acc34a1
@@ -31,25 +32,26 @@ public record AESVO(String secretKeyString, IvParameterSpec iv) implements Decod
 		return base64EncodeToString(iv.getIV());
 	}
 	
-	public static AESVO generate() {
-		return generate(KEY);
+	public String base64Key() {
+		return base64EncodeToString(KEY.getBytes(StandardCharsets.UTF_8));
 	}
 	
-	public static AESVO generate(String secretKeyString) {
+	public static AESVO generate() {
 		IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes(StandardCharsets.UTF_8));
-		return new AESVO(secretKeyString, ivParameterSpec);
+		SecretKeySpec secretKey = new SecretKeySpec(KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+		return new AESVO(secretKey, ivParameterSpec);
 	}
 	
 	@Override
-	public String decrypt(String encrypted) {
+	public String crypt(int cryptMode, String text) {
 		try {
-			SecretKeySpec secretKey = new SecretKeySpec(secretKeyString.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+			Cipher cipher = Cipher.getInstance(ALGORITHM);
+			cipher.init(cryptMode, key, iv);
 			
-			Cipher cipher = Cipher.getInstance(ALGORITHM_FULL);
-			cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
+			byte[] bytes = getCryptBytes(cryptMode, text);
 			
-			byte[] decrypted = cipher.doFinal(hexToBytes(encrypted));
-			return new String(decrypted, StandardCharsets.UTF_8);
+			byte[] decrypted = cipher.doFinal(bytes);
+			return getCryptResult(cryptMode, decrypted);
 		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
 			throw new DecryptException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
 		} catch(InvalidKeyException ike) {

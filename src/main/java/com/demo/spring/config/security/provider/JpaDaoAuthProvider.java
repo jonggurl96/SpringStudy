@@ -4,6 +4,7 @@ package com.demo.spring.config.security.provider;
 import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
 import com.demo.spring.sec.crypto.EncUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,8 +14,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 @Slf4j
 public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
@@ -41,11 +45,15 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
 		HashMap<String, Object> credentials = (HashMap<String, Object>) authentication.getCredentials();
 		
-		PasswordEncoder encoder = getPasswordEncoder();
-		String decodedPassword = encUtil.decrypt(customUserDetails.getPassword());
+		HttpServletRequest req =
+				((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+		
+		String decodedPassword = encUtil.decrypt(req.getSession(), customUserDetails.getPassword());
 		log.debug(">>> Decoded Password. {}", decodedPassword);
+		
+		PasswordEncoder encoder = getPasswordEncoder();
 		if(!encoder.matches((CharSequence) credentials.get("password"), decodedPassword)) {
-			int userCo = 1; // tn_users 테이블에 칼럼 추가
+			int userCo = 1; // TODO tn_users 테이블에 칼럼 추가
 			throw new PasswordNotMatchException(String.format("%d/%d", userCo, MAX_CO));
 		}
 	}

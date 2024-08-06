@@ -46,8 +46,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	}
 	
 	private String decrypt(HttpSession session, String encrypted) {
-		encUtil.setSession(session);
-		return encUtil.decrypt(encrypted);
+		return encUtil.decrypt(session, encrypted);
 	}
 	
 }

@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 @Slf4j
-public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
+public class RSAGenHelper extends CryptoGenHelper<RSAVO> {
 	
 	private final int RADIX_MODULUS;
 	
@@ -23,12 +23,15 @@ public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 	
 	private final String ATTR_EXP;
 	
+	private final String ATTR_PRI_EXP;
+	
 	public RSAGenHelper(RSAProperties properties) {
 		super(properties.getKeySize(), properties.getAttrKey());
 		RADIX_MODULUS = properties.getRadixModulus();
 		RADIX_EXPONENT = properties.getRadixExponent();
 		ATTR_MOD = properties.getAttrMod();
 		ATTR_EXP = properties.getAttrExp();
+		ATTR_PRI_EXP = properties.getAttrPriExp();
 	}
 	
 	@Override
@@ -51,6 +54,7 @@ public class RSAGenHelper extends DecoderGenHelper<RSAVO> {
 		session.setAttribute(ATTR_KEY, rsavo);
 		model.addAttribute(ATTR_MOD, rsavo.base64Modulus());
 		model.addAttribute(ATTR_EXP, rsavo.base64Exponent());
+		model.addAttribute(ATTR_PRI_EXP, rsavo.base64PriExp());
 		addType(model, "RSA");
 	}
 	

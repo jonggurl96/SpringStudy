@@ -5,30 +5,31 @@ const aesAlgorithmName = 'aes-256-cbc';
 
 /**
  * <pre>
- *     1. AES 키 생성
- *     2. 패스워드 AES 암호화
- *     3. RSA 공개키 생성
- *     4. AES 키 암호화
- *     5. 패스워드 값 변경: [암호화한 패스워드]|_|_|[암호화한 AES 비밀키]
+ *     1. AES key값 RSA 복호화
+ *     2. text AES 암호화
+ *     3. 암호화 결과 반환
  * </pre>
  * @param rsaOptions
  * @param aesOptions
  */
 function hybridEncrypt(rsaOptions, aesOptions) {
-	const SECRET_KEY = crypto.randomBytes(aesOptions.keySizeByte);
-	const INITIAL_VECTOR = Buffer.from(aesOptions.iv, 'base64');
-
-	console.log(INITIAL_VECTOR)
-
-	const cipher = crypto.createCipheriv(aesAlgorithmName, SECRET_KEY, INITIAL_VECTOR);
-
-	const encrypted64 = cipher.update(aesOptions.text, 'utf8', 'base64') + cipher.final('base64');
+	const SECRET_KEY = Buffer.from(aesOptions.key);
+	const INITIAL_VECTOR = Buffer.from(aesOptions.iv);
 
 	const rsa = new NodeRSA({ b: rsaOptions.keySizeBit });
-	rsa.keyPair.setPublic(atob(rsaOptions.modulus), atob(rsaOptions.exponent));
-	const encryptedSecret = rsa.encrypt(SECRET_KEY, 'base64', 'buffer');
 
-	return `${encrypted64}--==AES==--${encryptedSecret}`;
+	const mod = rsaOptions.modulus;
+	const exp = rsaOptions.exponent;
+	rsa.keyPair.setPublic(mod, exp);
+
+	console.log(`mod: ${mod}, exp: ${exp}, key: ${SECRET_KEY}, iv: ${INITIAL_VECTOR}`)
+
+	const encryptedKey = Buffer.from(rsa.decrypt(SECRET_KEY, 'base64'))
+
+	const cipher = crypto.createCipheriv(aesAlgorithmName, encryptedKey, INITIAL_VECTOR);
+
+	return cipher.update(aesOptions.text, 'utf8', 'base64') + cipher.final('base64');
+
 }
 
 (function(window) {

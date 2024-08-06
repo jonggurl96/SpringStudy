@@ -1,7 +1,7 @@
 package com.demo.spring.config.security.util.helper;
 
 
-import com.demo.spring.config.security.util.vo.DecoderVO;
+import com.demo.spring.config.security.util.vo.CryptoVO;
 import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.NonNull;
@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @Getter
 @RequiredArgsConstructor
-public abstract class DecoderGenHelper<T extends DecoderVO> {
+public abstract class CryptoGenHelper<T extends CryptoVO> {
 	
 	protected final int KEY_SIZE;
 	
@@ -23,8 +23,8 @@ public abstract class DecoderGenHelper<T extends DecoderVO> {
 	
 	public abstract void setWebAttr(@NonNull T t, @NonNull HttpSession session, @NonNull Model model);
 	
-	public DecoderVO getSessionAttr(HttpSession session) {
-		return (DecoderVO) session.getAttribute(ATTR_KEY);
+	public CryptoVO getSessionAttr(HttpSession session) {
+		return (CryptoVO) session.getAttribute(ATTR_KEY);
 	}
 	
 	@SuppressWarnings({"unchecked"})

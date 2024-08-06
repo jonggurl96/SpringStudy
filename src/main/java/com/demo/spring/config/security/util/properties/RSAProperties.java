@@ -20,6 +20,8 @@ public class RSAProperties {
 	
 	private String attrExp;
 	
+	private String attrPriExp;
+	
 	private String attrKey;
 	
 }

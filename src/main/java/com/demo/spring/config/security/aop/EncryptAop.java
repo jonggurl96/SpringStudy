@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
@@ -39,6 +40,9 @@ public class EncryptAop {
 		
 		rsaHelper.setWebAttr(rsa, session, model);
 		aesHelper.setWebAttr(aes, session, model);
+		
+		String encryptedAesKey = rsa.crypt(Cipher.ENCRYPT_MODE, AESVO.KEY);
+		aesHelper.setEncryptedKey(encryptedAesKey, model);
 	}
 	
 }

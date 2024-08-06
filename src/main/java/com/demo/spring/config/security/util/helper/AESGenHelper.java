@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 
 @Slf4j
-public class AESGenHelper extends DecoderGenHelper<AESVO> {
+public class AESGenHelper extends CryptoGenHelper<AESVO> {
 	
 	private final String ATTR_IV;
 	
@@ -32,8 +32,12 @@ public class AESGenHelper extends DecoderGenHelper<AESVO> {
 		return vo;
 	}
 	
-	public AESVO generateWithKey(String key) {
-		return AESVO.generate(key);
+	@Override
+	public AESVO getSessionAttr(HttpSession session) {
+		return (AESVO) super.getSessionAttr(session);
 	}
 	
+	public void setEncryptedKey(String key, Model model) {
+		model.addAttribute(ATTR_KEY, key);
+	}
 }

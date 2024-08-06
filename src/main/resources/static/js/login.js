@@ -7,8 +7,9 @@ window.onload = () => {
 		const elPassword = document.loginForm.password;
 
 		const rsaOptions = {
-			modulus: document.querySelector("#crypto-modulus").value,
-			exponent: document.querySelector("#crypto-exponent").value,
+			modulus: atob(document.querySelector("#crypto-modulus").value),
+			exponent: atob(document.querySelector("#crypto-exponent").value),
+			priExp: atob(document.querySelector("#crypto-pri-exp").value),
 			keySizeBit: 2048
 		}
 
@@ -16,7 +17,8 @@ window.onload = () => {
 			text: elPassword.value,
 			keySizeByte: 32,
 			ivSizeByte: 16,
-			iv: document.querySelector("#aes-iv").value
+			iv: document.querySelector("#aes-iv").value,
+			key: document.querySelector("#aes-key").value
 		}
 
 		elPassword.value = encryption(rsaOptions, aesOptions)
