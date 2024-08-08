@@ -8,11 +8,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
 
 /**
  * RSAVO.java
@@ -25,26 +22,14 @@ import java.security.spec.RSAPublicKeySpec;
  * @since 24. 7. 18.
  */
 @Slf4j
-public record RSAVO(PrivateKey privateKey, PublicKey publicKey, String modulus, String exponent,
-                    String priExp) implements CryptoVO {
+public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements CryptoVO {
 	
 	public static final String ALGORITHM = "RSA";
 	
 	public static final String ALGORITHM_FULL = "RSA/ECB/PKCS1Padding";
 	
-	public String base64Modulus() {
-		return base64EncodeToString(modulus.getBytes());
-	}
 	
-	public String base64Exponent() {
-		return base64EncodeToString(exponent.getBytes());
-	}
-	
-	public String base64PriExp() {
-		return base64EncodeToString(priExp.getBytes());
-	}
-	
-	public static RSAVO generate(int keySize, int modulusRadix, int exponentRadix) throws NoSuchAlgorithmException,
+	public static RSAVO generate(int keySize) throws NoSuchAlgorithmException,
 			InvalidKeySpecException {
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
 		keyPairGenerator.initialize(keySize, new SecureRandom());
@@ -53,15 +38,7 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey, String modulus, 
 		PublicKey publicKey = keyPair.getPublic();
 		PrivateKey privateKey = keyPair.getPrivate();
 		
-		KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
-		
-		RSAPublicKeySpec publicKeySpec = keyFactory.getKeySpec(publicKey, RSAPublicKeySpec.class);
-		String modulus = publicKeySpec.getModulus().toString(modulusRadix);
-		String exponent = publicKeySpec.getPublicExponent().toString(exponentRadix);
-		
-		String priExp = ((RSAPrivateKey) privateKey).getPrivateExponent().toString(modulusRadix);
-		
-		return new RSAVO(privateKey, publicKey, modulus, exponent, priExp);
+		return new RSAVO(privateKey, publicKey);
 	}
 	
 	@Override
@@ -73,13 +50,12 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey, String modulus, 
 			
 			cipher.init(cryptMode, key);
 			
-			byte[] bytes = cryptMode == Cipher.DECRYPT_MODE ? base64Decode(text)
-			                                                : text.getBytes(StandardCharsets.UTF_8);
+			byte[] bytes = getCryptBytes(cryptMode, text);
 			
 			byte[] decrypted = cipher.doFinal(bytes);
 			
-			return cryptMode == Cipher.ENCRYPT_MODE ? base64EncodeToString(decrypted)
-			                                        : new String(decrypted, StandardCharsets.UTF_8);
+			return getCryptResult(cryptMode, decrypted);
+			
 		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
 			throw new DecryptException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
 		} catch(InvalidKeyException ike) {

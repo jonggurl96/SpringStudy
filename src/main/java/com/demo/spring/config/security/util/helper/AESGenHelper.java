@@ -11,25 +11,24 @@ import org.springframework.ui.Model;
 @Slf4j
 public class AESGenHelper extends CryptoGenHelper<AESVO> {
 	
-	private final String ATTR_IV;
-	
 	public AESGenHelper(AESProperties properties) {
 		super(properties.getKeySize(), properties.getAttrKey());
-		ATTR_IV = properties.getAttrIv();
 	}
 	
 	@Override
-	public void setWebAttr(@NonNull AESVO aesvo, @NonNull HttpSession session, @NonNull Model model) {
-		model.addAttribute(ATTR_IV, aesvo.base64Iv());
-		addType(model, "AES");
+	public void setWebAttr(@NonNull AESVO aesvo, @NonNull HttpSession session) {
+		session.setAttribute(ATTR_KEY, aesvo);
 	}
 	
 	@Override
 	protected AESVO generate(int rsaKeySize) {
-		AESVO vo = AESVO.generate();
+		AESVO vo = AESVO.generate(rsaKeySize);
 		log.debug(">>> Decoder Record AESVO Generated.\n{}", vo);
-		log.debug(">>> AESVO Initial Vector: {}", vo.iv().getIV());
 		return vo;
+	}
+	
+	public void setEncryptedKey(String key, Model model) {
+		model.addAttribute(ATTR_KEY, key);
 	}
 	
 	@Override
@@ -37,7 +36,4 @@ public class AESGenHelper extends CryptoGenHelper<AESVO> {
 		return (AESVO) super.getSessionAttr(session);
 	}
 	
-	public void setEncryptedKey(String key, Model model) {
-		model.addAttribute(ATTR_KEY, key);
-	}
 }

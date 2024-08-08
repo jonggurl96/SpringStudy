@@ -13,45 +13,43 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Arrays;
 
-public record AESVO(SecretKeySpec key, IvParameterSpec iv) implements CryptoVO {
+public record AESVO(String key, String iv) implements CryptoVO {
 	
 	public static final String ALGORITHM = "AES";
 	
-	/**
-	 * AESVO_ENCRYPTION__DECRYPTION_KEY MD5 HASHING f3ab59b339c6a34d2c58b78a0d33a5d9
-	 */
-	public static final String KEY = "f3ab59b339c6a34d2c58b78a0d33a5d9";
+	public static final String ALGORITHM_FULL = "AES/CBC/PKCS5Padding";
 	
-	/**
-	 * _INITIAL_VECTOR_ MD5 HASHING 84a82539b0e2e85d954faaa84acc34a1
-	 */
-	public static final String IV = "84a82539b0e2e85d";
 	
-	public String base64Iv() {
-		return base64EncodeToString(iv.getIV());
-	}
-	
-	public String base64Key() {
-		return base64EncodeToString(KEY.getBytes(StandardCharsets.UTF_8));
-	}
-	
-	public static AESVO generate() {
-		IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes(StandardCharsets.UTF_8));
-		SecretKeySpec secretKey = new SecretKeySpec(KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
-		return new AESVO(secretKey, ivParameterSpec);
+	public static AESVO generate(int rsaKeySize) {
+		SecureRandom random = new SecureRandom();
+		
+		byte[] keyBytes = new byte[rsaKeySize];
+		random.nextBytes(keyBytes);
+		
+		byte[] ivBytes = new byte[rsaKeySize / 2];
+		random.nextBytes(ivBytes);
+		
+		return new AESVO(Arrays.toString(keyBytes), Arrays.toString(ivBytes));
 	}
 	
 	@Override
 	public String crypt(int cryptMode, String text) {
 		try {
-			Cipher cipher = Cipher.getInstance(ALGORITHM);
-			cipher.init(cryptMode, key, iv);
+			SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+			IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes(StandardCharsets.UTF_8));
+			
+			Cipher cipher = Cipher.getInstance(ALGORITHM_FULL);
+			cipher.init(cryptMode, secretKeySpec, ivParameterSpec);
 			
 			byte[] bytes = getCryptBytes(cryptMode, text);
 			
 			byte[] decrypted = cipher.doFinal(bytes);
+			
 			return getCryptResult(cryptMode, decrypted);
+			
 		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
 			throw new DecryptException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
 		} catch(InvalidKeyException ike) {

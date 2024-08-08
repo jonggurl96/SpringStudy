@@ -6,22 +6,9 @@ window.onload = () => {
 	document.querySelector("#loginBtn").addEventListener("click", () => {
 		const elPassword = document.loginForm.password;
 
-		const rsaOptions = {
-			modulus: atob(document.querySelector("#crypto-modulus").value),
-			exponent: atob(document.querySelector("#crypto-exponent").value),
-			priExp: atob(document.querySelector("#crypto-pri-exp").value),
-			keySizeBit: 2048
-		}
+		const encodedParams = document.querySelector("#crypto-params").value;
 
-		const aesOptions = {
-			text: elPassword.value,
-			keySizeByte: 32,
-			ivSizeByte: 16,
-			iv: document.querySelector("#aes-iv").value,
-			key: document.querySelector("#aes-key").value
-		}
-
-		elPassword.value = encryption(rsaOptions, aesOptions)
+		elPassword.value = encrypt(elPassword.value, encodedParams)
 
 		console.log(elPassword.value)
 		alert(elPassword.value)

@@ -2,26 +2,60 @@ package com.demo.spring.sec.crypto;
 
 
 import com.demo.spring.config.security.util.helper.AESGenHelper;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.AESVO;
+import com.demo.spring.config.security.util.vo.RSAVO;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
 
-import javax.crypto.Cipher;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 
 @Setter
-@Component
 @RequiredArgsConstructor
 public class EncUtil {
 	
 	private final AESGenHelper aesGenHelper;
 	
-	public String decrypt(HttpSession session, String cipher) {
-		int cryptMode = Cipher.DECRYPT_MODE;
+	private final RSAGenHelper rsaGenHelper;
+	
+	private static final String DELIMITER = "[|<|NAMES|>|]";
+	
+	private static final String RSA_PREFIX = "-----BEGIN PRIVATE KEY-----";
+	
+	private static final String RSA_SUFFIX = "-----END PRIVATE KEY-----";
+	
+	public byte[] getParamString(HttpSession session) {
 		AESVO aesvo = aesGenHelper.getSessionAttr(session);
+		RSAVO rsavo = rsaGenHelper.getSessionAttr(session);
 		
-		return aesvo.crypt(cryptMode, cipher);
+		List<String> paramList = List.of(RSA_PREFIX,
+		                                 Arrays.toString(rsavo.privateKey().getEncoded()),
+		                                 RSA_SUFFIX,
+		                                 aesvo.key(),
+		                                 aesvo.iv());
+		String params = String.join("|", paramList);
+		
+		List<String> paramNames = List.of("prfx", "rk", "sfx", "ak", "iv");
+		SecureRandom random = new SecureRandom(params.getBytes(StandardCharsets.UTF_8));
+		
+		ArrayList<String> paramNameCodeList = new ArrayList<>(8);
+		
+		paramNames.forEach(name -> {
+			String sb = "\"" + name
+			            + "\": \""
+			            + random.nextLong()
+			            + "\"";
+			paramNameCodeList.add(sb);
+		});
+		
+		String ret = params + DELIMITER + "{" + String.join(", ", paramNameCodeList) + "}";
+		return Base64.getEncoder().encode(ret.getBytes(StandardCharsets.UTF_8));
 	}
 	
 }

@@ -5,6 +5,7 @@ import com.demo.spring.config.security.util.helper.AESGenHelper;
 import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.AESVO;
 import com.demo.spring.config.security.util.vo.RSAVO;
+import com.demo.spring.sec.crypto.EncUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
@@ -38,11 +38,11 @@ public class EncryptAop {
 		RSAVO rsa = rsaHelper.generate();
 		AESVO aes = aesHelper.generate();
 		
-		rsaHelper.setWebAttr(rsa, session, model);
-		aesHelper.setWebAttr(aes, session, model);
+		rsaHelper.setWebAttr(rsa, session);
+		aesHelper.setWebAttr(aes, session);
 		
-		String encryptedAesKey = rsa.crypt(Cipher.ENCRYPT_MODE, AESVO.KEY);
-		aesHelper.setEncryptedKey(encryptedAesKey, model);
+		EncUtil encUtil = new EncUtil(aesHelper, rsaHelper);
+		model.addAttribute("CRYPTO_PARAMS", encUtil.getParamString(session));
 	}
 	
 }

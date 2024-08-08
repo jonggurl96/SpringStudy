@@ -1,37 +1,46 @@
-import NodeRSA from 'node-rsa';
-import crypto from "crypto";
+import * as crypto from "node:crypto";
 
-const aesAlgorithmName = 'aes-256-cbc';
+function seperateParamNames(encoded) {
+	const arr = atob(encoded).split("[|<|NAMES|>|]");
+	const paramNameArr = arr[0].split("|");
+	const params = {
+		prfx: paramNameArr[0],
+		rk: paramNameArr[1],
+		sfx: paramNameArr[2],
+		ak: paramNameArr[3],
+		iv: paramNameArr[4]
+	};
 
-/**
- * <pre>
- *     1. AES key값 RSA 복호화
- *     2. text AES 암호화
- *     3. 암호화 결과 반환
- * </pre>
- * @param rsaOptions
- * @param aesOptions
- */
-function hybridEncrypt(rsaOptions, aesOptions) {
-	const SECRET_KEY = Buffer.from(aesOptions.key);
-	const INITIAL_VECTOR = Buffer.from(aesOptions.iv);
+	const paramObj = JSON.parse(arr[1]) || {};
+	Object.keys(params).forEach(k => {
+		params[k] = paramObj[params[k]];
+	});
 
-	const rsa = new NodeRSA({ b: rsaOptions.keySizeBit });
+	return params;
+}
 
-	const mod = rsaOptions.modulus;
-	const exp = rsaOptions.exponent;
-	rsa.keyPair.setPublic(mod, exp);
+function decryptAesKey(params) {
+	const { prfx, rk, sfx, ak } = params;
+	const privateKeyData = [prfx, rk, sfx].join("\n");
+	const privateKey = crypto.createPrivateKey(privateKeyData);
+	return crypto.privateDecrypt(privateKey, Buffer.from(ak)).toString("utf8");
+}
 
-	console.log(`mod: ${mod}, exp: ${exp}, key: ${SECRET_KEY}, iv: ${INITIAL_VECTOR}`)
+function encrypt(text, params) {
+	const { key, slt, iv } = params;
 
-	const encryptedKey = Buffer.from(rsa.decrypt(SECRET_KEY, 'base64'))
+	const saltedKey = crypto.scryptSync(Buffer.from(key), Buffer.from(slt), 32);
+	const cipher = crypto.createCipheriv("aes-256-cbc", saltedKey, iv);
 
-	const cipher = crypto.createCipheriv(aesAlgorithmName, encryptedKey, INITIAL_VECTOR);
+	return cipher.update(text, "utf8", "base64") + cipher.final("base64");
+}
 
-	return cipher.update(aesOptions.text, 'utf8', 'base64') + cipher.final('base64');
-
+function raEnc(text, encoded) {
+	const params = seperateParamNames(encoded);
+	params.ak = decryptAesKey(params);
+	return encrypt(text, params);
 }
 
 (function(window) {
-	window.encryption = hybridEncrypt;
+	window.encrypt = raEnc;
 })(window);
