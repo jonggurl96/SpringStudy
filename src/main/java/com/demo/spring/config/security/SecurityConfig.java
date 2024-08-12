@@ -28,9 +28,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 	
-	private final UserDetailsService userDetailsService;
-	
 	private final EncUtil encUtil;
+	
+	private final UserDetailsService userDetailsService;
 	
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {

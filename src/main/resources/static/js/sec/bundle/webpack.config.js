@@ -12,10 +12,10 @@ export default {
 	mode: "development",
 	resolve: {
 		alias: {
-			crypto: "crypto-browserify",
+			'node:crypto': "crypto-browserify",
 			stream: "stream-browserify",
 			vm: "vm-browserify",
-		}
+		},
 	},
 	plugins: [
 		new webpack.ProvidePlugin({

@@ -6,8 +6,11 @@ import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.AESVO;
 import com.demo.spring.config.security.util.vo.RSAVO;
 import jakarta.servlet.http.HttpSession;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -16,7 +19,10 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+@Slf4j
+@Getter
 @Setter
+@Component
 @RequiredArgsConstructor
 public class EncUtil {
 	
@@ -30,7 +36,7 @@ public class EncUtil {
 	
 	private static final String RSA_SUFFIX = "-----END PRIVATE KEY-----";
 	
-	public byte[] getParamString(HttpSession session) {
+	public String getParamString(HttpSession session) {
 		AESVO aesvo = aesGenHelper.getSessionAttr(session);
 		RSAVO rsavo = rsaGenHelper.getSessionAttr(session);
 		
@@ -55,7 +61,16 @@ public class EncUtil {
 		});
 		
 		String ret = params + DELIMITER + "{" + String.join(", ", paramNameCodeList) + "}";
-		return Base64.getEncoder().encode(ret.getBytes(StandardCharsets.UTF_8));
+		log.debug(">>> CRYPTO_PARAMS: {}", ret);
+		return Base64.getEncoder().encodeToString(ret.getBytes(StandardCharsets.UTF_8));
+	}
+	
+	public AESVO getAes() {
+		return aesGenHelper.generate();
+	}
+	
+	public RSAVO getRsa() {
+		return rsaGenHelper.generate();
 	}
 	
 }

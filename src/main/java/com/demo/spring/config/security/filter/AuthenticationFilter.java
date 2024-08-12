@@ -1,6 +1,7 @@
 package com.demo.spring.config.security.filter;
 
 
+import com.demo.spring.config.security.util.vo.AESVO;
 import com.demo.spring.sec.crypto.EncUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,7 +47,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	}
 	
 	private String decrypt(HttpSession session, String encrypted) {
-		return encUtil.decrypt(session, encrypted);
+		AESVO aesvo = encUtil.getAesGenHelper().getSessionAttr(session);
+		return aesvo.decrypt(encrypted);
 	}
 	
 }
