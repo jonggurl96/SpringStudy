@@ -12,7 +12,7 @@ export default {
 	mode: "development",
 	resolve: {
 		alias: {
-			'node:crypto': "crypto-browserify",
+			crypto: "crypto-browserify",
 			stream: "stream-browserify",
 			vm: "vm-browserify",
 		},

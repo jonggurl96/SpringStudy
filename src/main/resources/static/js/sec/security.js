@@ -1,4 +1,4 @@
-import * as crypto from "node:crypto";
+import crypto from "crypto";
 
 function seperateParamNames(encoded) {
 	const arr = atob(encoded).split("[|<|NAMES|>|]");
