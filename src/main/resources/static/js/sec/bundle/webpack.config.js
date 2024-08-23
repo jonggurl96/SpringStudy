@@ -13,8 +13,7 @@ export default {
 	resolve: {
 		alias: {
 			crypto: "crypto-browserify",
-			stream: "stream-browserify",
-			vm: "vm-browserify",
+			vm: "vm-browserify"
 		},
 	},
 	plugins: [
