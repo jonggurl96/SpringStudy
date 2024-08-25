@@ -3,12 +3,13 @@ window.onload = () => {
 	if(errMsg)
 		alert(errMsg)
 
-	document.querySelector("#loginBtn").addEventListener("click", () => {
+	document.querySelector("#loginBtn").addEventListener("click", async () => {
 		const elPassword = document.loginForm.password;
 
 		const encodedParams = document.querySelector("#crypto-params").value;
 
-		elPassword.value = encrypt(elPassword.value, encodedParams)
+		// elPassword.value = encrypt(elPassword.value, encodedParams);
+		elPassword.value = await secEnc(elPassword.value, encodedParams);
 
 		console.log(elPassword.value)
 		alert(elPassword.value)

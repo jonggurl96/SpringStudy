@@ -33,7 +33,7 @@ public class EncUtil {
 	private static final String DELIMITER = "[|<|NAMES|>|]";
 	
 	private static final String RSA_PREFIX = "-----BEGIN PRIVATE KEY-----";
-	
+	// PEM PKCS8 FORMAT
 	private static final String RSA_SUFFIX = "-----END PRIVATE KEY-----";
 	
 	public String getParamString(HttpSession session) {
