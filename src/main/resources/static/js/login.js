@@ -3,7 +3,7 @@ window.onload = () => {
 	if(errMsg)
 		alert(errMsg);
 
-	document.querySelector("#loginBtn").addEventListener("click", () => {
+	document.querySelector("#loginBtn").addEventListener("click", async () => {
 		const elPassword = document.loginForm.password;
 
 		encrypt(elPassword.value).then(crypto => {
