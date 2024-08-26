@@ -1,11 +1,12 @@
 package com.demo.spring.config.security.filter;
 
 
+import com.demo.spring.config.security.util.helper.AESGenHelper;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.AESVO;
-import com.demo.spring.sec.crypto.EncUtil;
+import com.demo.spring.config.security.util.vo.RSAVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +21,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
-	private final EncUtil encUtil;
+	private final AESGenHelper aesGenHelper;
+	
+	private final RSAGenHelper rsaGenHelper;
 	
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -33,7 +36,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		String password = obtainPassword(request);
 		password = password == null ? "" : password;
 		
-		String decodedPassword = decrypt(request.getSession(), password);
+		String decodedPassword = decrypt(request, password);
 		log.debug(">>> Decoded Password. {}", decodedPassword);
 		credentials.put("password", decodedPassword);
 		
@@ -46,8 +49,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		return getAuthenticationManager().authenticate(authRequst);
 	}
 	
-	private String decrypt(HttpSession session, String encrypted) {
-		AESVO aesvo = encUtil.getAesGenHelper().getSessionAttr(session);
+	private String decrypt(HttpServletRequest request, String encrypted) {
+		String encryptedKey = request.getParameter("encryptedKey");
+		String iv = request.getParameter("iv");
+		
+		RSAVO rsavo = rsaGenHelper.getSessionAttr(request.getSession());
+		String aesKey = rsavo.decrypt(encryptedKey);
+		
+		AESVO aesvo = AESVO.importVO(aesKey, iv);
+		aesGenHelper.setWebAttr(aesvo, request.getSession());
 		return aesvo.decrypt(encrypted);
 	}
 	

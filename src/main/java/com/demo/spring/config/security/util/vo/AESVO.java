@@ -1,7 +1,7 @@
 package com.demo.spring.config.security.util.vo;
 
 
-import com.demo.spring.config.security.exception.dec.DecryptException;
+import com.demo.spring.config.security.exception.dec.CryptoException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -22,6 +22,9 @@ public record AESVO(String key, String iv) implements CryptoVO {
 	
 	public static final String ALGORITHM_FULL = "AES/CBC/PKCS5Padding";
 	
+	public static AESVO importVO(String key, String iv) {
+		return new AESVO(key, iv);
+	}
 	
 	public static AESVO generate(int rsaKeySize) {
 		SecureRandom random = new SecureRandom();
@@ -51,15 +54,15 @@ public record AESVO(String key, String iv) implements CryptoVO {
 			return getCryptResult(cryptMode, decrypted);
 			
 		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
-			throw new DecryptException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
+			throw new CryptoException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
 		} catch(InvalidKeyException ike) {
-			throw new DecryptException("사용할 수 없는 키입니다.");
+			throw new CryptoException("사용할 수 없는 키입니다.");
 		} catch(IllegalBlockSizeException ibe) {
-			throw new DecryptException("Block Size가 잘못 지정되었습니다.", ibe);
+			throw new CryptoException("Block Size가 잘못 지정되었습니다.", ibe);
 		} catch(BadPaddingException bpe) {
-			throw new DecryptException("Padding이 잘못되었습니다.", bpe);
+			throw new CryptoException("Padding이 잘못되었습니다.", bpe);
 		} catch(InvalidAlgorithmParameterException iape) {
-			throw new DecryptException("ParameterSpec이 잘못되었습니다.", iape);
+			throw new CryptoException("ParameterSpec이 잘못되었습니다.", iape);
 		}
 	}
 	

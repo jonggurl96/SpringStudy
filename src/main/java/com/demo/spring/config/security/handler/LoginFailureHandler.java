@@ -5,7 +5,7 @@ import com.demo.spring.config.security.exception.AccessDeniedException;
 import com.demo.spring.config.security.exception.LoginFailedTooMuchException;
 import com.demo.spring.config.security.exception.NotConfirmedException;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
-import com.demo.spring.config.security.exception.dec.DecryptException;
+import com.demo.spring.config.security.exception.dec.CryptoException;
 import com.demo.spring.config.security.util.LoginResultCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -60,7 +60,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 			case LoginFailedTooMuchException ignored -> setForLoginFailCoExceed(request, "로그인 시도 횟수를 초과한 계정입니다.");
 			case NotConfirmedException ignored -> setForNotConfirmed(request, "인증이 완료되지 않은 계정입니다.");
 			case AccessDeniedException ignored -> setForAccessDenied(request, "접근이 거부되었습니다.");
-			case DecryptException de -> {
+			case CryptoException de -> {
 				String encodedPassword = de.getMessage();
 				setForPwdNotMatch(request, "패스워드 복호화에 실패했습니다.");
 				log.error(">>> {}", encodedPassword, de);

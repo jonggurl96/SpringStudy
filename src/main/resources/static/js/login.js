@@ -1,30 +1,34 @@
 window.onload = () => {
-	const errMsg = document.querySelector("#errMsg").value
+	const errMsg = document.querySelector("#errMsg").value;
 	if(errMsg)
-		alert(errMsg)
+		alert(errMsg);
 
 	document.querySelector("#loginBtn").addEventListener("click", () => {
 		const elPassword = document.loginForm.password;
+		const elKey = document.loginForm.encryptedKey;
+		const elIv = document.loginForm.iv;
 
-		const encodedParams = document.querySelector("#crypto-params").value;
+		encrypt(elPassword.value).then(({ aesKey, aesIv, encrypted }) => {
+			console.log(aesKey, aesIv, encrypted);
+			alert(encrypted);
+			elPassword.value = encrypted;
+			elKey.value = encrypted;
+			elIv.value = aesIv;
+			document.loginForm.submit();
+		});
 
-		elPassword.value = encrypt(elPassword.value, encodedParams)
-
-		console.log(elPassword.value)
-		alert(elPassword.value)
-		document.loginForm.submit()
-	})
-}
+	});
+};
 
 function getContextPath() {
-	let contextPath = null
-	if(contextPath === null) return null
+	let contextPath = null;
+	if(contextPath === null) return null;
 
 	if(!contextPath.startsWith("/"))
-		contextPath = "/" + contextPath
+		contextPath = "/" + contextPath;
 
 	if(!contextPath.endsWith("/"))
-		contextPath += "/"
+		contextPath += "/";
 }
 
 /**
@@ -33,11 +37,11 @@ function getContextPath() {
  * @returns {string}
  */
 function formToQueryString(form) {
-	const params = form.querySelectorAll("input[name], select[name]")
+	const params = form.querySelectorAll("input[name], select[name]");
 	return Array.from(params.values())
 		.filter(element => element.value !== null)
 		.map(element => `${element.name}=${element.value}`)
-		.join("&")
+		.join("&");
 }
 
 /**
@@ -47,7 +51,7 @@ function formToQueryString(form) {
  * @returns {Promise<Response>}
  */
 function postForm(form, options) {
-	return post(form.action, formToQueryString(form), options)
+	return post(form.action, formToQueryString(form), options);
 }
 
 /**
@@ -70,10 +74,10 @@ function post(url, data, options) {
 		redirect: "follow", // manual, *follow, error
 		referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
 		body: data,
-	}, options)
+	}, options);
 
-	const contextPath = getContextPath()
+	const contextPath = getContextPath();
 	url = contextPath === null ? url : contextPath + url;
 
-	return fetch(url, fetchOptions)
+	return fetch(url, fetchOptions);
 }

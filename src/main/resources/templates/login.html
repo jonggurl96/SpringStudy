@@ -5,7 +5,7 @@
 	<meta http-equiv="Content-Type" charset="UTF-8" content="text/javascript">
 	<title>로그인</title>
 	<link rel="stylesheet" th:href="@{/css/login.css}">
-	<script th:src="@{/js/sec/bundle/dist/index.js}"></script>
+	<script th:src="@{/js/sec/security.js}"></script>
 	<script th:src="@{/js/login.js}"></script>
 </head>
 <body>
@@ -30,6 +30,8 @@
 				<button type="button" id="loginBtn">로그인</button>
 				<button type="button">회원가입</button>
 			</div>
+			<input type="hidden" name="encryptedKey">
+			<input type="hidden" name="iv">
 		</form>
 	</div>
 </div>

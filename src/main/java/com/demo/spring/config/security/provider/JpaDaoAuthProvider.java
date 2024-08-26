@@ -3,8 +3,9 @@ package com.demo.spring.config.security.provider;
 
 import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
+import com.demo.spring.config.security.util.helper.AESGenHelper;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.AESVO;
-import com.demo.spring.sec.crypto.EncUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +25,9 @@ import java.util.Objects;
 @Slf4j
 public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	
-	private final EncUtil encUtil;
+	private final AESGenHelper aesGenHelper;
+	
+	private final RSAGenHelper rsaGenHelper;
 	
 	/**
 	 * 로그인 실패 횟수 정의
@@ -32,11 +35,14 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	@Value("${login.maxTryNo}")
 	private int MAX_CO;
 	
-	public JpaDaoAuthProvider(UserDetailsService userDetailsService, EncUtil encUtil,
+	public JpaDaoAuthProvider(UserDetailsService userDetailsService,
+	                          AESGenHelper aesGenHelper,
+	                          RSAGenHelper rsaGenHelper,
 	                          BCryptPasswordEncoder bCryptPasswordEncoder) {
 		super(bCryptPasswordEncoder);
 		setUserDetailsService(userDetailsService);
-		this.encUtil = encUtil;
+		this.aesGenHelper = aesGenHelper;
+		this.rsaGenHelper = rsaGenHelper;
 	}
 	
 	@Override
@@ -49,7 +55,7 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		HttpServletRequest req =
 				((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 		
-		AESVO aesvo = encUtil.getAesGenHelper().getSessionAttr(req.getSession());
+		AESVO aesvo = aesGenHelper.getSessionAttr(req.getSession());
 		String decodedPassword = aesvo.decrypt(customUserDetails.getPassword());
 		log.debug(">>> Decoded Password. {}", decodedPassword);
 		

@@ -22,7 +22,7 @@ public interface CryptoVO {
 	}
 	
 	public default byte[] base64Decode(String text) {
-		return Base64.getDecoder().decode(text.getBytes(StandardCharsets.UTF_8));
+		return Base64.getDecoder().decode(text);
 	}
 	
 	public default byte[] getCryptBytes(int cryptMode, String text) {
@@ -43,4 +43,5 @@ public interface CryptoVO {
 	public default String decrypt(String text) {
 		return crypt(Cipher.DECRYPT_MODE, text);
 	}
+	
 }

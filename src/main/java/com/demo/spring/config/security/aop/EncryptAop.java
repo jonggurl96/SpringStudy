@@ -1,9 +1,8 @@
 package com.demo.spring.config.security.aop;
 
 
-import com.demo.spring.config.security.util.vo.AESVO;
+import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.config.security.util.vo.RSAVO;
-import com.demo.spring.sec.crypto.EncUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
@@ -16,28 +15,27 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class EncryptAop {
 	
-	private final EncUtil encUtil;
+	private final RSAGenHelper rsaGenHelper;
 	
 	@Before(
-			value = "@annotation(com.demo.spring.config.security.annotation.HybridEncrypt) && args(model, session, ..)"
+			value = "@annotation(com.demo.spring.config.security.annotation.RsaReady) && args(model, session, ..)"
 			, argNames = "model,session")
 	public void generateRSAVO(Model model, HttpSession session) throws NoSuchPaddingException,
 			IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-		RSAVO rsa = encUtil.getRsa();
-		AESVO aes = encUtil.getAes();
+		RSAVO rsa = rsaGenHelper.generate();
 		
-		encUtil.getRsaGenHelper().setWebAttr(rsa, session);
-		encUtil.getAesGenHelper().setWebAttr(aes, session);
+		rsaGenHelper.setWebAttr(rsa, session);
 		
-		String cryptoParams = encUtil.getParamString(session);
-		
-		model.addAttribute("CRYPTO_PARAMS", cryptoParams);
+		model.addAttribute("PUB", Base64.getEncoder().encodeToString(rsa.publicKey().getEncoded()));
+		model.addAttribute("e", rsa.getEncodedExponent());
+		model.addAttribute("n", rsa.getEncodedModulus());
 	}
 	
 }

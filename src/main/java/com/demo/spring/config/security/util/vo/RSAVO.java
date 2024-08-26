@@ -1,15 +1,21 @@
 package com.demo.spring.config.security.util.vo;
 
 
-import com.demo.spring.config.security.exception.dec.DecryptException;
+import com.demo.spring.config.security.exception.dec.CryptoException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.MGF1ParameterSpec;
+import java.util.Base64;
 
 /**
  * RSAVO.java
@@ -26,13 +32,15 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 	
 	public static final String ALGORITHM = "RSA";
 	
-	public static final String ALGORITHM_FULL = "RSA/ECB/PKCS1Padding";
+	public static final String ALGORITHM_FULL = "RSA/ECB/OAEPPadding";
 	
+	public static final String HASHING = "SHA-256";
 	
-	public static RSAVO generate(int keySize) throws NoSuchAlgorithmException,
-			InvalidKeySpecException {
+	public static final String MD_NAME = "MGF1";
+	
+	public static RSAVO generate(int keySize) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
-		keyPairGenerator.initialize(keySize, new SecureRandom());
+		keyPairGenerator.initialize(keySize);
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
 		
 		PublicKey publicKey = keyPair.getPublic();
@@ -46,9 +54,12 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 		try {
 			Cipher cipher = Cipher.getInstance(ALGORITHM_FULL);
 			
-			Key key = cryptMode == Cipher.ENCRYPT_MODE ? privateKey : publicKey;
+			OAEPParameterSpec spec = new OAEPParameterSpec(HASHING, MD_NAME, new MGF1ParameterSpec(HASHING),
+			                                               PSource.PSpecified.DEFAULT);
 			
-			cipher.init(cryptMode, key);
+			Key key = cryptMode == Cipher.ENCRYPT_MODE ? publicKey : privateKey;
+			
+			cipher.init(cryptMode, key, spec);
 			
 			byte[] bytes = getCryptBytes(cryptMode, text);
 			
@@ -57,14 +68,30 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 			return getCryptResult(cryptMode, decrypted);
 			
 		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
-			throw new DecryptException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
+			throw new CryptoException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
 		} catch(InvalidKeyException ike) {
-			throw new DecryptException("사용할 수 없는 키입니다.");
+			throw new CryptoException("사용할 수 없는 키입니다.");
 		} catch(IllegalBlockSizeException ibe) {
-			throw new DecryptException("Block Size가 잘못 지정되었습니다.", ibe);
+			throw new CryptoException("Block Size가 잘못 지정되었습니다.", ibe);
 		} catch(BadPaddingException bpe) {
-			throw new DecryptException("Padding이 잘못되었습니다.", bpe);
+			throw new CryptoException("Padding이 잘못되었습니다.", bpe);
+		} catch(InvalidAlgorithmParameterException iape) {
+			throw new CryptoException("알고리즘 ParameterSpec이 잘못되었습니다.", iape);
 		}
+	}
+	
+	public String getEncodedExponent() {
+		return new String(Base64.getUrlEncoder()
+		                        .withoutPadding()
+		                        .encode(((RSAPublicKey) publicKey).getPublicExponent().toByteArray()),
+		                  StandardCharsets.UTF_8);
+	}
+	
+	public String getEncodedModulus() {
+		return new String(Base64.getUrlEncoder()
+		                        .withoutPadding()
+		                        .encode(((RSAPublicKey) publicKey).getModulus().toByteArray()),
+		                  StandardCharsets.UTF_8);
 	}
 	
 }

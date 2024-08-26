@@ -1,46 +1,58 @@
-import crypto from "crypto";
+async function createAesKey() {
+	return await crypto.subtle.generateKey({
+		name: 'AES-CBC',
+		length: 256
+	}, true, ['encrypt', 'decrypt']);
+}
 
-function seperateParamNames(encoded) {
-	const arr = atob(encoded).split("[|<|NAMES|>|]");
-	const paramNameArr = arr[0].split("|");
-	const params = {
-		prfx: paramNameArr[0],
-		rk: paramNameArr[1],
-		sfx: paramNameArr[2],
-		ak: paramNameArr[3],
-		iv: paramNameArr[4]
-	};
+async function importRsaKey() {
+	return await crypto.subtle.importKey("jwk",
+		{
+			kty: "RSA",
+			e: document.querySelector("#rsa-public-exponent").value,
+			n: document.querySelector("#rsa-public-modulus").value.replace("A", "8"),
+			alg: "RSA-OAEP-256",
+			ext: true
+		},
+		{ name: "RSA-OAEP", hash: { name: 'SHA-256' } },
+		false,
+		['encrypt']);
+}
 
-	const paramObj = JSON.parse(arr[1]) || {};
-	Object.keys(params).forEach(k => {
-		params[k] = paramObj[params[k]];
+function decode(parameter) {
+	const bytes = new Uint8Array(parameter);
+	const byteStrArr = [];
+	bytes.forEach(b => {
+		byteStrArr.push(String.fromCharCode(b));
 	});
-
-	return params;
+	return btoa(byteStrArr.join(""));
 }
 
-function decryptAesKey(params) {
-	const { prfx, rk, sfx, ak } = params;
-	const privateKeyData = [prfx, rk, sfx].join("\n");
-	const privateKey = crypto.createPrivateKey(privateKeyData);
-	return crypto.privateDecrypt(privateKey, Buffer.from(ak)).toString("utf8");
-}
+async function rsaes(message = "") {
+	const aesKey = await createAesKey();
+	console.log(aesKey);
+	const rsaKey = await importRsaKey();
+	console.log(rsaKey);
+	const aesIv = crypto.getRandomValues(new Uint8Array(16));
 
-function encrypt(text, params) {
-	const { key, slt, iv } = params;
+	const keyBytes = await crypto.subtle.exportKey("raw", aesKey);
 
-	const saltedKey = crypto.scryptSync(Buffer.from(key), Buffer.from(slt), 32);
-	const cipher = crypto.createCipheriv("aes-256-cbc", saltedKey, iv);
+	const encryptedAesKey = await crypto.subtle.encrypt({
+		name: "RSA-OAEP"
+	}, rsaKey, keyBytes);
 
-	return cipher.update(text, "utf8", "base64") + cipher.final("base64");
-}
+	const encrypted = await crypto.subtle.encrypt({
+		name: 'AES-CBC',
+		iv: aesIv
+	}, aesKey, new TextEncoder().encode(message));
 
-function raEnc(text, encoded) {
-	const params = seperateParamNames(encoded);
-	params.ak = decryptAesKey(params);
-	return encrypt(text, params);
+	return {
+		aesKey: decode(encryptedAesKey),
+		aesIv: decode(aesIv),
+		encrypted: decode(encrypted)
+	};
 }
 
 (function(window) {
-	window.encrypt = raEnc;
+	window.encrypt = rsaes;
 })(window);

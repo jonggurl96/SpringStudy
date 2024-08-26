@@ -2,7 +2,7 @@ package com.demo.spring.usr.web;
 
 
 import com.demo.spring.config.security.annotation.AuthenticationUser;
-import com.demo.spring.config.security.annotation.HybridEncrypt;
+import com.demo.spring.config.security.annotation.RsaReady;
 import com.demo.spring.config.security.util.helper.AESGenHelper;
 import com.demo.spring.config.security.util.helper.RSAGenHelper;
 import com.demo.spring.usr.dto.UserDTO;
@@ -25,7 +25,7 @@ public class LoginController extends AbstractController {
 	
 	private final AESGenHelper aesGenHelper;
 	
-	@HybridEncrypt
+	@RsaReady
 	@GetMapping(value = "/login")
 	public String loginPage(Model model,
 	                        HttpSession session,
