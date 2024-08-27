@@ -23,23 +23,22 @@ function decode(parameter) {
 	const bytes = new Uint8Array(parameter);
 	const byteStrArr = [];
 	bytes.forEach(b => {
-		byteStrArr.push(String.fromCharCode(b));
+		byteStrArr.push(b.toString(16));
 	});
+	console.log(byteStrArr);
 	return btoa(byteStrArr.join(""));
 }
 
 async function rsaes(message = "") {
 	const aesKey = await createAesKey();
-	console.log(aesKey);
 	const rsaKey = await importRsaKey();
-	console.log(rsaKey);
 	const aesIv = crypto.getRandomValues(new Uint8Array(16));
 
 	const keyBytes = await crypto.subtle.exportKey("raw", aesKey);
 
 	const encryptedAesKey = await crypto.subtle.encrypt({
 		name: "RSA-OAEP"
-	}, rsaKey, keyBytes);
+	}, rsaKey, new Uint8Array(keyBytes));
 
 	const encrypted = await crypto.subtle.encrypt({
 		name: 'AES-CBC',
