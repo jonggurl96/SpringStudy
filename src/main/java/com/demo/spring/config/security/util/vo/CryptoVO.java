@@ -25,12 +25,12 @@ public interface CryptoVO {
 		String hexString = new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
 		int byteSize = hexString.length() / 2;
 		byte[] bytes = new byte[byteSize];
-		
+
 		for(int i = 0; i < byteSize; i++) {
 			String sub = hexString.substring(i * 2, i * 2 + 2);
 			bytes[i] = (byte) Integer.parseInt(sub, 16);
 		}
-		
+
 		return bytes;
 	}
 	

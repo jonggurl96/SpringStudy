@@ -62,7 +62,6 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 			cipher.init(cryptMode, key, spec);
 			
 			byte[] bytes = getCryptBytes(cryptMode, text);
-			
 			byte[] decrypted = cipher.doFinal(bytes);
 			
 			return getCryptResult(cryptMode, decrypted);
@@ -88,10 +87,12 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 	}
 	
 	public String getEncodedModulus() {
-		return new String(Base64.getUrlEncoder()
-		                        .withoutPadding()
-		                        .encode(((RSAPublicKey) publicKey).getModulus().toByteArray()),
-		                  StandardCharsets.UTF_8);
+		byte[] bytes = ((RSAPublicKey) publicKey).getModulus().toByteArray();
+		
+		if(bytes[0] < 0)
+			bytes[0] += (byte) 128;
+		
+		return new String(Base64.getUrlEncoder().withoutPadding().encode(bytes), StandardCharsets.UTF_8);
 	}
 	
 }

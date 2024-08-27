@@ -10,7 +10,7 @@ async function importRsaKey() {
 		{
 			kty: "RSA",
 			e: document.querySelector("#rsa-public-exponent").value,
-			n: document.querySelector("#rsa-public-modulus").value.replace("A", "8"),
+			n: document.querySelector("#rsa-public-modulus").value,
 			alg: "RSA-OAEP-256",
 			ext: true
 		},
@@ -25,7 +25,7 @@ function decode(parameter) {
 	bytes.forEach(b => {
 		byteStrArr.push(b.toString(16));
 	});
-	console.log(byteStrArr);
+
 	return btoa(byteStrArr.join(""));
 }
 
@@ -44,6 +44,8 @@ async function rsaes(message = "") {
 		name: 'AES-CBC',
 		iv: aesIv
 	}, aesKey, new TextEncoder().encode(message));
+
+	console.log(new Uint8Array(encrypted));
 
 	return {
 		aesKey: decode(encryptedAesKey),

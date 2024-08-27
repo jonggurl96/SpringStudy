@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -33,7 +34,8 @@ public class EncryptAop {
 		
 		rsaGenHelper.setWebAttr(rsa, session);
 		
-		model.addAttribute("PUB", Base64.getEncoder().encodeToString(rsa.publicKey().getEncoded()));
+		model.addAttribute("PUB", new String(Base64.getEncoder().encode(rsa.publicKey().getEncoded()),
+		                                     StandardCharsets.UTF_8));
 		model.addAttribute("e", rsa.getEncodedExponent());
 		model.addAttribute("n", rsa.getEncodedModulus());
 	}
