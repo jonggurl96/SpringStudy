@@ -6,11 +6,12 @@ async function createAesKey() {
 }
 
 async function importRsaKey() {
+	const n = atob(document.querySelector("#rsa-public-modulus").value);
 	return await crypto.subtle.importKey("jwk",
 		{
 			kty: "RSA",
 			e: document.querySelector("#rsa-public-exponent").value,
-			n: document.querySelector("#rsa-public-modulus").value,
+			n: n.startsWith("00") ? n.substring(2) : n,
 			alg: "RSA-OAEP-256",
 			ext: true
 		},
@@ -23,7 +24,8 @@ function decode(parameter) {
 	const bytes = new Uint8Array(parameter);
 	const byteStrArr = [];
 	bytes.forEach(b => {
-		byteStrArr.push(b.toString(16));
+		const s = b.toString(16);
+		byteStrArr.push(s.length === 1 ? "0" + s : s);
 	});
 
 	return btoa(byteStrArr.join(""));
@@ -45,12 +47,11 @@ async function rsaes(message = "") {
 		iv: aesIv
 	}, aesKey, new TextEncoder().encode(message));
 
-	console.log(new Uint8Array(encrypted));
-
 	return {
 		aesKey: decode(encryptedAesKey),
 		aesIv: decode(aesIv),
-		encrypted: decode(encrypted)
+		encrypted: decode(encrypted),
+		encryptedAesKey
 	};
 }
 

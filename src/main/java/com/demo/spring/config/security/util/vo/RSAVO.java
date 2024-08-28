@@ -51,48 +51,57 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 	
 	@Override
 	public String crypt(int cryptMode, String text) {
+		Cipher cipher;
+		
 		try {
-			Cipher cipher = Cipher.getInstance(ALGORITHM_FULL);
-			
-			OAEPParameterSpec spec = new OAEPParameterSpec(HASHING, MD_NAME, new MGF1ParameterSpec(HASHING),
-			                                               PSource.PSpecified.DEFAULT);
-			
-			Key key = cryptMode == Cipher.ENCRYPT_MODE ? publicKey : privateKey;
-			
+			cipher = Cipher.getInstance(ALGORITHM_FULL);
+		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
+			throw new CryptoException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
+		}
+		
+		OAEPParameterSpec spec = new OAEPParameterSpec(HASHING, MD_NAME, new MGF1ParameterSpec(HASHING),
+		                                               PSource.PSpecified.DEFAULT);
+		
+		Key key = cryptMode == Cipher.ENCRYPT_MODE ? publicKey : privateKey;
+		
+		try {
 			cipher.init(cryptMode, key, spec);
-			
+		} catch(InvalidKeyException ike) {
+			throw new CryptoException("사용할 수 없는 키입니다.");
+		} catch(InvalidAlgorithmParameterException iape) {
+			throw new CryptoException("알고리즘 ParameterSpec이 잘못되었습니다.", iape);
+		}
+		
+		try {
 			byte[] bytes = getCryptBytes(cryptMode, text);
 			byte[] decrypted = cipher.doFinal(bytes);
 			
 			return getCryptResult(cryptMode, decrypted);
-			
-		} catch(NoSuchPaddingException | NoSuchAlgorithmException nse) {
-			throw new CryptoException("알고리즘 정보를 불러오는 데 실패했습니다.", nse);
-		} catch(InvalidKeyException ike) {
-			throw new CryptoException("사용할 수 없는 키입니다.");
 		} catch(IllegalBlockSizeException ibe) {
 			throw new CryptoException("Block Size가 잘못 지정되었습니다.", ibe);
 		} catch(BadPaddingException bpe) {
 			throw new CryptoException("Padding이 잘못되었습니다.", bpe);
-		} catch(InvalidAlgorithmParameterException iape) {
-			throw new CryptoException("알고리즘 ParameterSpec이 잘못되었습니다.", iape);
 		}
 	}
 	
 	public String getEncodedExponent() {
-		return new String(Base64.getUrlEncoder()
-		                        .withoutPadding()
-		                        .encode(((RSAPublicKey) publicKey).getPublicExponent().toByteArray()),
+		return new String(Base64.getUrlEncoder().encode(((RSAPublicKey) publicKey).getPublicExponent().toByteArray()),
 		                  StandardCharsets.UTF_8);
 	}
 	
 	public String getEncodedModulus() {
-		byte[] bytes = ((RSAPublicKey) publicKey).getModulus().toByteArray();
+		return byteToBase64UrlEncode(((RSAPublicKey) publicKey).getModulus().toByteArray());
+	}
+	
+	private String byteToBase64UrlEncode(byte[] bytes) {
+		StringBuilder hexStringBuilder = new StringBuilder();
+		for(byte b : bytes) {
+			hexStringBuilder.append(String.format("%02x", b));
+		}
+		String hexString = hexStringBuilder.toString();
 		
-		if(bytes[0] < 0)
-			bytes[0] += (byte) 128;
-		
-		return new String(Base64.getUrlEncoder().withoutPadding().encode(bytes), StandardCharsets.UTF_8);
+		return Base64.getUrlEncoder()
+		             .encodeToString(hexString.getBytes(StandardCharsets.UTF_8));
 	}
 	
 }
