@@ -14,6 +14,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +53,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
 	private String decrypt(HttpServletRequest request, String encrypted) {
 		String encryptedKey = request.getParameter("encryptedKey");
-		String iv = request.getParameter("iv");
+		byte[] iv = decodeIv(request.getParameter("iv"));
 		
 		RSAVO rsavo = rsaGenHelper.getSessionAttr(request.getSession());
 		String aesKey = rsavo.decrypt(encryptedKey);
@@ -59,6 +61,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		AESVO aesvo = AESVO.importVO(aesKey, iv);
 		aesGenHelper.setWebAttr(aesvo, request.getSession());
 		return aesvo.decrypt(encrypted);
+	}
+	
+	private byte[] decodeIv(String iv) {
+		String hexIv = new String(Base64.getDecoder().decode(iv), StandardCharsets.UTF_8);
+		int byteSize = hexIv.length() / 2;
+		byte[] bytes = new byte[byteSize];
+		for(int i = 0; i < byteSize; i++) {
+			bytes[i] = (byte) Integer.parseInt(hexIv, i * 2, i * 2 + 2, 16);
+		}
+		return bytes;
 	}
 	
 }

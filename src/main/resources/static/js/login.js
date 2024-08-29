@@ -8,20 +8,11 @@ window.onload = () => {
 		const elKey = document.loginForm.encryptedKey;
 		const elIv = document.loginForm.iv;
 
-		encrypt(elPassword.value).then(({ aesKey, aesIv, encrypted, keyBytes, encryptedAesKey }) => {
-			console.log("<<encryptedAesKey>>");
-			console.log(new Uint8Array(encryptedAesKey));
-
-			console.log("<<modulus>>");
-			const n = atob(document.querySelector("#rsa-public-modulus").value);
-			const nn = n.startsWith("00") ? n.substring(2) : n;
-			console.log(nn);
-			console.log(nn.length);
-			// alert(encrypted);
-			// elPassword.value = encrypted;
-			// elKey.value = aesKey;
-			// elIv.value = aesIv;
-			// document.loginForm.submit();
+		encrypt(elPassword.value).then(({ aesKey, aesIv, encrypted }) => {
+			elPassword.value = encrypted;
+			elKey.value = aesKey;
+			elIv.value = aesIv;
+			document.loginForm.submit();
 		});
 
 	});

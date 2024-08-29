@@ -16,13 +16,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-public record AESVO(String key, String iv) implements CryptoVO {
+public record AESVO(String key, byte[] iv) implements CryptoVO {
 	
 	public static final String ALGORITHM = "AES";
 	
 	public static final String ALGORITHM_FULL = "AES/CBC/PKCS5Padding";
 	
-	public static AESVO importVO(String key, String iv) {
+	public static AESVO importVO(String key, byte[] iv) {
 		return new AESVO(key, iv);
 	}
 	
@@ -35,21 +35,19 @@ public record AESVO(String key, String iv) implements CryptoVO {
 		byte[] ivBytes = new byte[rsaKeySize / 2];
 		random.nextBytes(ivBytes);
 		
-		return new AESVO(Arrays.toString(keyBytes), Arrays.toString(ivBytes));
+		return new AESVO(Arrays.toString(keyBytes), ivBytes);
 	}
 	
 	@Override
 	public String crypt(int cryptMode, String text) {
 		try {
 			SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), ALGORITHM);
-			IvParameterSpec ivParameterSpec = new IvParameterSpec(iv.getBytes(StandardCharsets.UTF_8));
+			IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 			
 			Cipher cipher = Cipher.getInstance(ALGORITHM_FULL);
 			cipher.init(cryptMode, secretKeySpec, ivParameterSpec);
 			
-			byte[] bytes = getCryptBytes(cryptMode, text);
-			
-			byte[] decrypted = cipher.doFinal(bytes);
+			byte[] decrypted = cipher.doFinal(text.getBytes(StandardCharsets.UTF_8));
 			
 			return getCryptResult(cryptMode, decrypted);
 			

@@ -85,23 +85,23 @@ public record RSAVO(PrivateKey privateKey, PublicKey publicKey) implements Crypt
 	}
 	
 	public String getEncodedExponent() {
-		return new String(Base64.getUrlEncoder().encode(((RSAPublicKey) publicKey).getPublicExponent().toByteArray()),
-		                  StandardCharsets.UTF_8);
+		return Base64.getUrlEncoder().encodeToString(((RSAPublicKey) publicKey).getPublicExponent().toByteArray());
 	}
 	
 	public String getEncodedModulus() {
-		return byteToBase64UrlEncode(((RSAPublicKey) publicKey).getModulus().toByteArray());
+		byte[] bytes = ((RSAPublicKey) publicKey).getModulus().toByteArray();
+		log.debug(">>> RSA Public Modulus Bytes: {}", bytes);
+		return byteToBase64Encode(bytes);
 	}
 	
-	private String byteToBase64UrlEncode(byte[] bytes) {
+	private String byteToBase64Encode(byte[] bytes) {
 		StringBuilder hexStringBuilder = new StringBuilder();
 		for(byte b : bytes) {
 			hexStringBuilder.append(String.format("%02x", b));
 		}
 		String hexString = hexStringBuilder.toString();
 		
-		return Base64.getUrlEncoder()
-		             .encodeToString(hexString.getBytes(StandardCharsets.UTF_8));
+		return Base64.getEncoder().encodeToString(hexString.getBytes(StandardCharsets.UTF_8));
 	}
 	
 }
