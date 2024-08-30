@@ -15,6 +15,7 @@ import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 
@@ -31,33 +32,24 @@ import java.util.Map;
 @Slf4j
 public class RsaAesManager extends CryptoManager {
 	
+	private final RsaAesProperties rsaAesProperties;
+	
 	private final RSAPublicKey RSA_PUBLIC_KEY;
 	
 	private final RSAPrivateKey RSA_PRIVATE_KEY;
 	
-	private final String RSA_NAME;
-	
-	private final String RSA_MD;
-	
-	private final String RSA_MGF;
-	
-	private final String AES_NAME;
-	
-	private final byte[] AESIV;
+	private final byte[] AES_IV;
 	
 	public static final String SEPERATOR = "RSAES";
 	
-	private byte[] AES_SECRET_KEY;
+	private final byte[] AES_SECRET_KEY;
 	
-	public RsaAesManager(RsaAesProperties properties) throws CryptoException {
+	public RsaAesManager(RsaAesProperties properties) {
 		super();
 		
-		RSA_NAME = properties.getRsaName();
-		RSA_MD = properties.getRsaMd();
-		RSA_MGF = properties.getRsaMgf();
-		AES_NAME = properties.getAesName();
+		rsaAesProperties = properties;
 		
-		KeyPair keyPair = generateKeyPair(properties.getRsaKeySize());
+		KeyPair keyPair = generateRsaKeyPair(rsaAesProperties.getRsaKeySize());
 		
 		PublicKey publicKey = keyPair.getPublic();
 		PrivateKey privateKey = keyPair.getPrivate();
@@ -65,12 +57,15 @@ public class RsaAesManager extends CryptoManager {
 		this.RSA_PRIVATE_KEY = (RSAPrivateKey) privateKey;
 		this.RSA_PUBLIC_KEY = (RSAPublicKey) publicKey;
 		
-		AESIV = new byte[properties.getAesKeySize() / 2];
-		new SecureRandom().nextBytes(AESIV);
+		AES_SECRET_KEY = base64HexToBytes(rsaAesProperties.getAesKey());
+		
+		int ivSize = rsaAesProperties.getAesKeySize() / 2;
+		AES_IV = new byte[ivSize];
+		
+		System.arraycopy(AES_SECRET_KEY, 0, AES_IV, 0, ivSize);
 	}
 	
-	
-	private KeyPair generateKeyPair(int keySize) throws CryptoException {
+	private KeyPair generateRsaKeyPair(int keySize) throws CryptoException {
 		try {
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
 			keyPairGenerator.initialize(keySize);
@@ -80,39 +75,65 @@ public class RsaAesManager extends CryptoManager {
 		}
 	}
 	
+	/**
+	 * <pre>
+	 *     1. base64 decoding
+	 *     2. RSA 복호화
+	 *     3. 구분자로 분리: AES 키, AES 암호, AES IV
+	 *     4. AES 복호화
+	 * </pre>
+	 *
+	 * @param text
+	 *
+	 * @return
+	 *
+	 * @throws CryptoException AES 키, IV가 객체 멤버와 다름
+	 */
 	@Override
 	public String decrypt(String text) throws CryptoException {
-		String[] keyAndText = text.split(SEPERATOR);
-		byte[] aesKeyBytes = decryptAesKey_RSA(keyAndText[0]);
-		AES_SECRET_KEY = aesKeyBytes;
-		return decryptMessage(aesKeyBytes, keyAndText[1]);
+		String encryptedRSA = new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
+		String[] keyCryptoIv = decryptAesKey_RSA(RSA_PRIVATE_KEY, encryptedRSA);
+		
+		if(!Arrays.equals(base64HexToBytes(keyCryptoIv[0]), AES_SECRET_KEY))
+			throw new CryptoException("잘못된 AES 키 값입니다.");
+		
+		if(!Arrays.equals(base64HexToBytes(keyCryptoIv[2]), AES_IV))
+			throw new CryptoException("AES IV가 다른 값입니다.");
+		
+		return decryptAES(keyCryptoIv[1]);
 	}
 	
-	public byte[] decryptAesKey_RSA(String encoded) {
+	/**
+	 * @param key
+	 * @param encoded
+	 *
+	 * @return String > RSA decrypt > AES 키, AES 암호, AES IV
+	 */
+	public String[] decryptAesKey_RSA(Key key, String encoded) {
 		int mode = Cipher.DECRYPT_MODE;
-		OAEPParameterSpec spec = new OAEPParameterSpec(RSA_MD,
-		                                               RSA_MGF,
-		                                               new MGF1ParameterSpec(RSA_MD),
+		OAEPParameterSpec spec = new OAEPParameterSpec(rsaAesProperties.getRsaMd(),
+		                                               rsaAesProperties.getRsaMgf(),
+		                                               new MGF1ParameterSpec(rsaAesProperties.getRsaMd()),
 		                                               PSource.PSpecified.DEFAULT);
 		
-		Cipher cipher = initCipher(RSA_NAME, mode, RSA_PRIVATE_KEY, spec);
-		return crypt(cipher, encoded, this::base64HexTobytes);
+		Cipher cipher = initCipher(rsaAesProperties.getRsaName(), mode, key, spec);
+		return cryptToString(cipher, encoded, this::base64HexToBytes).split(SEPERATOR);
 	}
 	
 	public String decryptMessage(byte[] aesKey, String text) {
 		int mode = Cipher.DECRYPT_MODE;
 		SecretKeySpec key = new SecretKeySpec(aesKey, "AES");
-		IvParameterSpec ivParameterSpec = new IvParameterSpec(AESIV);
+		IvParameterSpec ivParameterSpec = new IvParameterSpec(AES_IV);
 		
-		Cipher cipher = initCipher(AES_NAME, mode, key, ivParameterSpec);
-		return cryptToString(cipher, text, this::base64HexTobytes);
+		Cipher cipher = initCipher(rsaAesProperties.getAesName(), mode, key, ivParameterSpec);
+		return cryptToString(cipher, text, this::base64HexToBytes);
 	}
 	
 	public String decryptAES(String text) {
 		return decryptMessage(AES_SECRET_KEY, text);
 	}
 	
-	private byte[] base64HexTobytes(String base64Hex) {
+	private byte[] base64HexToBytes(String base64Hex) {
 		String hexString = new String(Base64.getDecoder().decode(base64Hex), StandardCharsets.UTF_8);
 		int byteSize = hexString.length() / 2;
 		byte[] bytes = new byte[byteSize];
@@ -131,16 +152,38 @@ public class RsaAesManager extends CryptoManager {
 		return Base64.getEncoder().encodeToString(sb.toString().getBytes(StandardCharsets.UTF_8));
 	}
 	
+	private String bytesToBase64UrlHex(byte[] bytes) {
+		StringBuilder sb = new StringBuilder();
+		for(byte b : bytes) {
+			sb.append(String.format("%02x", b));
+		}
+		return Base64.getUrlEncoder()
+		             .withoutPadding()
+		             .encodeToString(sb.toString().getBytes(StandardCharsets.UTF_8));
+	}
+	
 	@Override
 	public Map<String, String> getEncodedPropsMap() {
 		byte[] n = RSA_PUBLIC_KEY.getModulus().toByteArray();
 		byte[] e = RSA_PUBLIC_KEY.getPublicExponent().toByteArray();
 		return Map.of("n",
-		              bytesToBase64Hex(n),
+		              bytesToBase64UrlHex(n),
 		              "e",
 		              Base64.getEncoder().encodeToString(e),
+		              "ak",
+		              bytesToBase64Hex(AES_SECRET_KEY),
 		              "iv",
-		              bytesToBase64Hex(AESIV));
+		              bytesToBase64Hex(AES_IV),
+		              "sep",
+		              SEPERATOR);
+	}
+	
+	public String getSeperator() {
+		return SEPERATOR;
+	}
+	
+	public String getSessionKey() {
+		return rsaAesProperties.getSessionKey();
 	}
 	
 }

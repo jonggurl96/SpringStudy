@@ -1,8 +1,9 @@
-async function createAesKey() {
-	return await crypto.subtle.generateKey({
-		name:   'AES-CBC',
-		length: 256
-	}, true, ['encrypt']);
+async function importAesKey() {
+	return await crypto.subtle.importKey("raw",
+		encodeAesKey(), {
+			name:   'AES-CBC',
+			length: 256
+		}, false, ['encrypt']);
 }
 
 async function importRsaKey() {
@@ -17,13 +18,20 @@ async function importRsaKey() {
 	}, false, ['encrypt']);
 }
 
-function importModulus() {
-	const encodedHexString = atob(document.querySelector("#rsa-public-modulus").value);
-	const modBytes = [];
+function base64UrlHexToBytes(base64UrlHex = "") {
+	const hexString = atob(base64UrlHex);
+	const bytes = [];
 	
-	for(let i = 2; i < encodedHexString.length; i += 2) {
-		modBytes.push(parseInt(encodedHexString.substring(i, i + 2), 16));
+	for(let i = 0; i < hexString.length; i += 2) {
+		bytes.push(parseInt(hexString.substring(i, i + 2), 16));
 	}
+	
+	return bytes;
+}
+
+function importModulus() {
+	const modBytes = base64UrlHexToBytes(document.querySelector("#rsa-public-modulus").value);
+	// TODO 0번방 제거
 	
 	return btoa(modBytes.map(b => String.fromCharCode(b)).join(""))
 		.replaceAll(/\+/g, "-")
@@ -32,17 +40,16 @@ function importModulus() {
 }
 
 function encodeIv() {
-	const iv = atob(document.querySelector("#aes-iv").value);
-	const bytes = [];
-	
-	for(let i = 0; i < iv.length; i += 2) {
-		bytes.push(parseInt(iv.substring(i, i + 2), 16));
-	}
-	
+	const bytes = base64UrlHexToBytes(document.querySelector("#aes-iv").value);
 	return new Uint8Array(bytes);
 }
 
-function decode(parameter) {
+function encodeAesKey() {
+	const bytes = base64UrlHexToBytes(document.querySelector("#aes-key").value);
+	return new Uint8Array(bytes);
+}
+
+function toBase64Hex(parameter) {
 	const bytes = new Uint8Array(parameter);
 	const byteStrArr = [];
 	bytes.forEach(b => {
@@ -54,28 +61,27 @@ function decode(parameter) {
 }
 
 async function rsaes(message = "") {
-	const aesKey = await createAesKey();
+	const aesKey = await importAesKey();
 	const rsaKey = await importRsaKey();
-	
 	const aesIv = encodeIv();
-	
-	const keyBytes = await crypto.subtle.exportKey("raw", aesKey);
-	
-	const encryptedAesKey = await crypto.subtle.encrypt({
-		name: "RSA-OAEP"
-	}, rsaKey, new Uint8Array(keyBytes));
 	
 	const encrypted = await crypto.subtle.encrypt({
 		name: 'AES-CBC',
 		iv:   aesIv
 	}, aesKey, new TextEncoder().encode(message));
 	
+	const aeskey64url = document.querySelector("#aes-key").value;
+	const crypto = toBase64Hex(encrypted);
+	const aesIv64Url = document.querySelector("#aes-iv").value;
+	const sep = document.querySelector("#rsaes-sep").value;
 	
-	return {
-		aesKey:    decode(encryptedAesKey),
-		aesIv:     decode(aesIv),
-		encrypted: decode(encrypted)
-	};
+	const willbeRSA = `${aeskey64url}${sep}${crypto}${sep}${aesIv64Url}`;
+	
+	const cryptoRSA = await crypto.subtle.encrypt({
+		name: "RSA-OAEP"
+	}, rsaKey, new TextEncoder().encode(willbeRSA));
+	
+	return toBase64Hex(cryptoRSA);
 }
 
 (function(window) {

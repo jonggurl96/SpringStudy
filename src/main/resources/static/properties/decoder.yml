@@ -14,3 +14,4 @@ decoder:
     rsa-key-size: 2048
     aes-name: AES/CBC/PKCS5Padding
     aes-key-size: 32
+    aes-key: NDY0ZjUyNWY0YTRmNGU0NzQ3NWY0NzQ1NGU0NTUyNDE1NDQ1NWY1MzQ1NDM1MjQ1NTQ1ZjQxNDU1MzRiNDU1OQ==

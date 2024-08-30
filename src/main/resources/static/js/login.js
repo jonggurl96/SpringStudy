@@ -5,13 +5,9 @@ window.onload = () => {
 
 	document.querySelector("#loginBtn").addEventListener("click", () => {
 		const elPassword = document.loginForm.password;
-		const elKey = document.loginForm.encryptedKey;
-		const elIv = document.loginForm.iv;
 
-		encrypt(elPassword.value).then(({ aesKey, aesIv, encrypted }) => {
-			elPassword.value = encrypted;
-			elKey.value = aesKey;
-			elIv.value = aesIv;
+		encrypt(elPassword.value).then(crypto => {
+			elPassword.value = crypto;
 			document.loginForm.submit();
 		});
 

@@ -24,14 +24,14 @@ public class EncryptAop {
 	private final RsaAesProperties rsaAesProperties;
 	
 	@Before(
-			value = "@annotation(com.demo.spring.config.security.annotation.RsaAesReady) && args(model, session, ..)"
-			, argNames = "model,session")
+			value = "@annotation(com.demo.spring.config.security.annotation.RsaAesReady) && args(model, session, ..)",
+			argNames = "model,session")
 	public void generateRSAVO(Model model, HttpSession session) throws NoSuchPaddingException,
 			IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 		
 		RsaAesManager manager = new RsaAesManager(rsaAesProperties);
 		model.addAllAttributes(manager.getEncodedPropsMap());
-		session.setAttribute(rsaAesProperties.getSessionKey(), manager);
+		session.setAttribute(manager.getSessionKey(), manager);
 	}
 	
 }

@@ -9,7 +9,9 @@
 <th:block th:fragment="crypto">
 	<input type="hidden" id="rsa-public-exponent" th:value="${e}">
 	<input type="hidden" id="rsa-public-modulus" th:value="${n}">
+	<input type="hidden" id="aes-key" th:value="${ak}">
 	<input type="hidden" id="aes-iv" th:value="${iv}">
+	<input type="hidden" id="rsaes-sep" th:value="${sep}">
 </th:block>
 
 </body>

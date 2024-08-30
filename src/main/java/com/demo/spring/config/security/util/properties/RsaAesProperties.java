@@ -20,6 +20,8 @@ public class RsaAesProperties {
 	
 	private String aesName;
 	
+	private String aesKey;
+	
 	private int aesKeySize;
 	
 	private String sessionKey = "RSA_AES_MANAGER";

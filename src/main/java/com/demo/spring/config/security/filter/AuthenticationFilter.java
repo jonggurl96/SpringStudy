@@ -12,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,23 +47,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	private String decrypt(HttpServletRequest request, String text) {
 		RsaAesManager manager = (RsaAesManager) request.getSession().getAttribute(rsaAesProperties.getSessionKey());
 		
-		String encryptedKey = request.getParameter("encryptedKey");
-		
-		String textChain = encryptedKey + RsaAesManager.SEPERATOR + text;
-		log.debug(">>> textChain: {}", textChain);
-		
-		return manager.decrypt(textChain);
-	}
-	
-	private byte[] decodeIv(String iv) {
-		String hexIv = new String(Base64.getDecoder().decode(iv), StandardCharsets.UTF_8);
-		int byteSize = hexIv.length() / 2;
-		byte[] bytes = new byte[byteSize];
-		for(int i = 0; i < byteSize; i++) {
-			bytes[i] = (byte) Integer.parseInt(hexIv, i * 2, i * 2 + 2, 16);
-		}
-		log.debug(">>> decoded iv: {}", bytes);
-		return bytes;
+		return manager.decrypt(text);
 	}
 	
 }
