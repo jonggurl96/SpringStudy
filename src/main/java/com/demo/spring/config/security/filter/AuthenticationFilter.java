@@ -1,10 +1,8 @@
 package com.demo.spring.config.security.filter;
 
 
-import com.demo.spring.config.security.util.helper.AESGenHelper;
-import com.demo.spring.config.security.util.helper.RSAGenHelper;
-import com.demo.spring.config.security.util.vo.AESVO;
-import com.demo.spring.config.security.util.vo.RSAVO;
+import com.demo.spring.config.security.util.mng.RsaAesManager;
+import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	
-	private final AESGenHelper aesGenHelper;
-	
-	private final RSAGenHelper rsaGenHelper;
+	private final RsaAesProperties rsaAesProperties;
 	
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -39,7 +35,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		password = password == null ? "" : password;
 		
 		String decodedPassword = decrypt(request, password);
-		log.debug(">>> Decoded Password. {}", decodedPassword);
 		credentials.put("password", decodedPassword);
 		
 		log.debug(">>> username: {}, password: {}", username, password);
@@ -51,16 +46,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		return getAuthenticationManager().authenticate(authRequst);
 	}
 	
-	private String decrypt(HttpServletRequest request, String encrypted) {
+	private String decrypt(HttpServletRequest request, String text) {
+		RsaAesManager manager = (RsaAesManager) request.getSession().getAttribute(rsaAesProperties.getSessionKey());
+		
 		String encryptedKey = request.getParameter("encryptedKey");
-		byte[] iv = decodeIv(request.getParameter("iv"));
 		
-		RSAVO rsavo = rsaGenHelper.getSessionAttr(request.getSession());
-		String aesKey = rsavo.decrypt(encryptedKey);
+		String textChain = encryptedKey + RsaAesManager.SEPERATOR + text;
+		log.debug(">>> textChain: {}", textChain);
 		
-		AESVO aesvo = AESVO.importVO(aesKey, iv);
-		aesGenHelper.setWebAttr(aesvo, request.getSession());
-		return aesvo.decrypt(encrypted);
+		return manager.decrypt(textChain);
 	}
 	
 	private byte[] decodeIv(String iv) {
@@ -70,6 +64,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		for(int i = 0; i < byteSize; i++) {
 			bytes[i] = (byte) Integer.parseInt(hexIv, i * 2, i * 2 + 2, 16);
 		}
+		log.debug(">>> decoded iv: {}", bytes);
 		return bytes;
 	}
 	

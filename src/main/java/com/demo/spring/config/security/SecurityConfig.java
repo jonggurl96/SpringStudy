@@ -6,8 +6,7 @@ import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.LoginFailureHandler;
 import com.demo.spring.config.security.handler.LoginSuccessHandler;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
-import com.demo.spring.config.security.util.helper.AESGenHelper;
-import com.demo.spring.config.security.util.helper.RSAGenHelper;
+import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -29,11 +28,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 	
-	private final AESGenHelper aesGenHelper;
-	
-	private final RSAGenHelper rsaGenHelper;
-	
 	private final UserDetailsService userDetailsService;
+	
+	private final RsaAesProperties rsaAesProperties;
 	
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -42,7 +39,7 @@ public class SecurityConfig {
 	
 	@Bean
 	public JpaDaoAuthProvider jpaDaoAuthProvider() {
-		return new JpaDaoAuthProvider(userDetailsService, aesGenHelper, rsaGenHelper, bCryptPasswordEncoder());
+		return new JpaDaoAuthProvider(userDetailsService, bCryptPasswordEncoder(), rsaAesProperties);
 	}
 	
 	@Bean
@@ -54,7 +51,7 @@ public class SecurityConfig {
 	
 	@Bean
 	public AuthenticationFilter authenticationFilter(AuthenticationManager authenticationManager) throws Exception {
-		AuthenticationFilter filter = new AuthenticationFilter(aesGenHelper, rsaGenHelper);
+		AuthenticationFilter filter = new AuthenticationFilter(rsaAesProperties);
 		filter.setFilterProcessesUrl("/actionLogin");
 		filter.setAuthenticationManager(authenticationManager);
 		filter.setAuthenticationSuccessHandler(loginSuccessHandler());

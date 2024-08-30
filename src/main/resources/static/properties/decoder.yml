@@ -7,3 +7,10 @@ decoder:
   aes:
     attr-key: AES__KEY
     key-size: 32
+  rsaes:
+    rsa-name: RSA/ECB/OAEPPadding
+    rsa-md: SHA-256
+    rsa-mgf: MGF1
+    rsa-key-size: 2048
+    aes-name: AES/CBC/PKCS5Padding
+    aes-key-size: 32

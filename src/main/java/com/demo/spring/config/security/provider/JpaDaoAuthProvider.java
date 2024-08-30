@@ -3,9 +3,8 @@ package com.demo.spring.config.security.provider;
 
 import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
-import com.demo.spring.config.security.util.helper.AESGenHelper;
-import com.demo.spring.config.security.util.helper.RSAGenHelper;
-import com.demo.spring.config.security.util.vo.AESVO;
+import com.demo.spring.config.security.util.mng.RsaAesManager;
+import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +24,7 @@ import java.util.Objects;
 @Slf4j
 public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	
-	private final AESGenHelper aesGenHelper;
-	
-	private final RSAGenHelper rsaGenHelper;
+	private final RsaAesProperties rsaAesProperties;
 	
 	/**
 	 * 로그인 실패 횟수 정의
@@ -36,13 +33,11 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	private int MAX_CO;
 	
 	public JpaDaoAuthProvider(UserDetailsService userDetailsService,
-	                          AESGenHelper aesGenHelper,
-	                          RSAGenHelper rsaGenHelper,
-	                          BCryptPasswordEncoder bCryptPasswordEncoder) {
+	                          BCryptPasswordEncoder bCryptPasswordEncoder,
+	                          RsaAesProperties rsaAesProperties) {
 		super(bCryptPasswordEncoder);
 		setUserDetailsService(userDetailsService);
-		this.aesGenHelper = aesGenHelper;
-		this.rsaGenHelper = rsaGenHelper;
+		this.rsaAesProperties = rsaAesProperties;
 	}
 	
 	@Override
@@ -55,8 +50,8 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		HttpServletRequest req =
 				((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 		
-		AESVO aesvo = aesGenHelper.getSessionAttr(req.getSession());
-		String decodedPassword = aesvo.decrypt(customUserDetails.getPassword());
+		RsaAesManager manager = (RsaAesManager) req.getSession().getAttribute(rsaAesProperties.getSessionKey());
+		String decodedPassword = manager.decryptAES(customUserDetails.getPassword());
 		log.debug(">>> Decoded Password. {}", decodedPassword);
 		
 		PasswordEncoder encoder = getPasswordEncoder();

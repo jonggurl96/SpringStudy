@@ -2,9 +2,8 @@ package com.demo.spring.usr.web;
 
 
 import com.demo.spring.config.security.annotation.AuthenticationUser;
-import com.demo.spring.config.security.annotation.RsaReady;
-import com.demo.spring.config.security.util.helper.AESGenHelper;
-import com.demo.spring.config.security.util.helper.RSAGenHelper;
+import com.demo.spring.config.security.annotation.RsaAesReady;
+import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
 import jakarta.servlet.http.HttpSession;
@@ -21,11 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequiredArgsConstructor
 public class LoginController extends AbstractController {
 	
-	private final RSAGenHelper rsaGenHelper;
+	private final RsaAesProperties rsaAesProperties;
 	
-	private final AESGenHelper aesGenHelper;
-	
-	@RsaReady
+	@RsaAesReady
 	@GetMapping(value = "/login")
 	public String loginPage(Model model,
 	                        HttpSession session,
@@ -43,8 +40,7 @@ public class LoginController extends AbstractController {
 	
 	@PostMapping(value = "/actionLogin")
 	public String login(HttpSession session) throws Exception {
-		session.removeAttribute(rsaGenHelper.getATTR_KEY());
-		session.removeAttribute(aesGenHelper.getATTR_KEY());
+		session.removeAttribute(rsaAesProperties.getSessionKey());
 		return "/main";
 	}
 	

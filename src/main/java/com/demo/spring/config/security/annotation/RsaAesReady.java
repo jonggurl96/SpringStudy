@@ -7,18 +7,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * RsaReady.java
+ * RsaAesReady.java
  * <pre>
  * AES 대칭키 암호화 사용을 위해 키값을 RSA 암호화
  * </pre>
  *
  * @author jongg
  * @version 1.0.0
- * @see com.demo.spring.config.security.util.helper.RSAGenHelper
+ * @see com.demo.spring.config.security.util.mng.RsaAesManager
  * @since 24. 7. 30.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.CLASS)
-@PubPriKeyEncrypt(algorithm = "RSA")
-public @interface RsaReady {
+@PubPriKeyEncrypt(algorithm = "RSAAES")
+public @interface RsaAesReady {
 }
