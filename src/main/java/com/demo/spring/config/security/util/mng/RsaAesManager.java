@@ -91,8 +91,7 @@ public class RsaAesManager extends CryptoManager {
 	 */
 	@Override
 	public String decrypt(String text) throws CryptoException {
-		String encryptedRSA = new String(Base64.getDecoder().decode(text), StandardCharsets.UTF_8);
-		String[] keyCryptoIv = decryptAesKey_RSA(RSA_PRIVATE_KEY, encryptedRSA);
+		String[] keyCryptoIv = decryptAesKey_RSA(RSA_PRIVATE_KEY, text);
 		
 		if(!Arrays.equals(base64HexToBytes(keyCryptoIv[0]), AES_SECRET_KEY))
 			throw new CryptoException("잘못된 AES 키 값입니다.");

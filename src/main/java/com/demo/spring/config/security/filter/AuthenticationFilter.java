@@ -5,6 +5,7 @@ import com.demo.spring.config.security.util.mng.RsaAesManager;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,7 +46,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	}
 	
 	private String decrypt(HttpServletRequest request, String text) {
-		RsaAesManager manager = (RsaAesManager) request.getSession().getAttribute(rsaAesProperties.getSessionKey());
+		HttpSession session = request.getSession();
+		RsaAesManager manager = (RsaAesManager) session.getAttribute(rsaAesProperties.getSessionKey());
 		
 		return manager.decrypt(text);
 	}

@@ -47,15 +47,16 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
 		HashMap<String, Object> credentials = (HashMap<String, Object>) authentication.getCredentials();
 		
-		HttpServletRequest req =
-				((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+//		HttpServletRequest req =
+//				((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 		
-		RsaAesManager manager = (RsaAesManager) req.getSession().getAttribute(rsaAesProperties.getSessionKey());
-		String decodedPassword = manager.decryptAES(customUserDetails.getPassword());
+//		RsaAesManager manager = (RsaAesManager) req.getSession().getAttribute(rsaAesProperties.getSessionKey());
+//		String decodedPassword = manager.decryptAES(customUserDetails.getPassword());
+		String decodedPassword = (String) credentials.get("password");
 		log.debug(">>> Decoded Password. {}", decodedPassword);
 		
 		PasswordEncoder encoder = getPasswordEncoder();
-		if(!encoder.matches((CharSequence) credentials.get("password"), decodedPassword)) {
+		if(!encoder.matches(customUserDetails.getPassword(), decodedPassword)) {
 			int userCo = 1; // TODO tn_users 테이블에 칼럼 추가
 			throw new PasswordNotMatchException(String.format("%d/%d", userCo, MAX_CO));
 		}

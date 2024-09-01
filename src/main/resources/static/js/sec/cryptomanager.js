@@ -31,9 +31,8 @@ function base64UrlHexToBytes(base64UrlHex = "") {
 
 function importModulus() {
 	const modBytes = base64UrlHexToBytes(document.querySelector("#rsa-public-modulus").value);
-	// TODO 0번방 제거
 	
-	return btoa(modBytes.map(b => String.fromCharCode(b)).join(""))
+	return btoa(modBytes.slice(1).map(b => String.fromCharCode(b)).join(""))
 		.replaceAll(/\+/g, "-")
 		.replaceAll(/\//g, "_")
 		.replaceAll(/=/g, "");
@@ -71,11 +70,11 @@ async function rsaes(message = "") {
 	}, aesKey, new TextEncoder().encode(message));
 	
 	const aeskey64url = document.querySelector("#aes-key").value;
-	const crypto = toBase64Hex(encrypted);
+	const encryptedText = toBase64Hex(encrypted);
 	const aesIv64Url = document.querySelector("#aes-iv").value;
 	const sep = document.querySelector("#rsaes-sep").value;
 	
-	const willbeRSA = `${aeskey64url}${sep}${crypto}${sep}${aesIv64Url}`;
+	const willbeRSA = `${aeskey64url}${sep}${encryptedText}${sep}${aesIv64Url}`;
 	
 	const cryptoRSA = await crypto.subtle.encrypt({
 		name: "RSA-OAEP"
