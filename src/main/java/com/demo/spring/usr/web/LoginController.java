@@ -1,7 +1,7 @@
 package com.demo.spring.usr.web;
 
 
-import com.demo.spring.config.security.annotation.AuthenticationUser;
+import com.demo.spring.config.security.annotation.AuthenticatedUser;
 import com.demo.spring.config.security.annotation.RsaAesReady;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import com.demo.spring.usr.dto.UserDTO;
@@ -45,7 +45,7 @@ public class LoginController extends AbstractController {
 	}
 	
 	@GetMapping("/main")
-	public String mainPage(@AuthenticationUser UserDTO userDTO) throws Exception {
+	public String mainPage(@AuthenticatedUser UserDTO userDTO) throws Exception {
 		log.debug(">>> main. {}", userDTO);
 		return "/main";
 	}

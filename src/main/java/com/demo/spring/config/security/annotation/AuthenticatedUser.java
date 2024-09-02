@@ -26,5 +26,5 @@ import java.lang.annotation.Target;
 				)
 		}
 )
-public @interface AuthenticationUser {
+public @interface AuthenticatedUser {
 }
