@@ -3,6 +3,8 @@ package com.demo.spring.config.security.provider;
 
 import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
+import com.demo.spring.config.security.service.UserDetailsServiceImpl;
+import com.demo.spring.usr.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,8 +25,7 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	@Value("${login.maxTryNo}")
 	private int MAX_CO;
 	
-	public JpaDaoAuthProvider(UserDetailsService userDetailsService,
-	                          PasswordEncoder passwordEncoder) {
+	public JpaDaoAuthProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
 		super(passwordEncoder);
 		setUserDetailsService(userDetailsService);
 	}
@@ -39,11 +40,20 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		String decodedPassword = (String) credentials.get("password");
 		log.debug(">>> Decoded Password. {}", decodedPassword);
 		
+		UserDTO userDTO = customUserDetails.getUserDTO();
+		
 		PasswordEncoder encoder = getPasswordEncoder();
 		if(!encoder.matches(decodedPassword, customUserDetails.getPassword())) {
-			int userCo = 1; // TODO tn_users 테이블에 칼럼 추가
-			throw new PasswordNotMatchException(String.format("%d/%d", userCo, MAX_CO));
+			
+			getService().increaseLoginFailrCnt(userDTO);
+			if(customUserDetails.isExceedLoginFailrCnt(MAX_CO))
+				throw new PasswordNotMatchException(customUserDetails.getLoginFailrCnt(), MAX_CO);
 		}
+		else getService().initLoginFailrCnt(userDTO);
+	}
+	
+	private UserDetailsServiceImpl getService() {
+		return (UserDetailsServiceImpl) getUserDetailsService();
 	}
 	
 }

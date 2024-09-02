@@ -49,9 +49,11 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 				}
 			}
 			case PasswordNotMatchException pnme -> {
-				String exMsg = pnme.getMessage();
-				String[] nowMax = exMsg.split("/");
-				String alertMsg = String.format("로그인 시도가 %s회 초과되었습니다.\n%s회 초과 시 본인인증을 거쳐야만 로그인 가능합니다.", nowMax[0], nowMax[1]);
+				int tryCnt = pnme.getTryCnt();
+				int maxTryCnt = pnme.getMaxTryCnt();
+				String alertMsg = String.format("로그인 시도가 %d회 초과되었습니다.\n%d회 초과 시 본인인증을 거쳐야만 로그인 가능합니다.",
+				                                tryCnt,
+				                                maxTryCnt);
 				setForPwdNotMatch(request, alertMsg);
 			}
 			case BadCredentialsException ignored -> setForUsernameNotFound(request, "사용자 정보가 정확하지 않습니다.");
@@ -70,7 +72,8 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 		log.error(">>> code: {}, errMsg: {}", request.getAttribute("code"), request.getAttribute("errMsg"));
 		String errMsg = URLEncoder.encode(request.getAttribute("errMsg").toString(), StandardCharsets.UTF_8);
 		
-		String encodedUrl = response.encodeURL(forwardUrl + "?code=" + request.getAttribute("code") + "&errMsg=" + errMsg);
+		String encodedUrl =
+				response.encodeURL(forwardUrl + "?code=" + request.getAttribute("code") + "&errMsg=" + errMsg);
 		response.sendRedirect(encodedUrl);
 	}
 	

@@ -31,4 +31,7 @@ public class User {
 	
 	@Schema(description = "사용자 암호")
 	private String password;
+	
+	@Schema(description = "로그인 실패 횟수")
+	private int cntLoginFailr;
 }

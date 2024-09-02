@@ -23,11 +23,14 @@ public class UserDTO {
 	
 	private String pwd;
 	
+	private int cntLoginFailr;
+	
 	public UserDTO(User user) {
 		this.userNo = user.getUserNo();
 		this.userId = user.getUserId();
 		this.username = user.getUsername();
 		this.pwd = user.getPassword();
+		this.cntLoginFailr = user.getCntLoginFailr();
 	}
 	
 }

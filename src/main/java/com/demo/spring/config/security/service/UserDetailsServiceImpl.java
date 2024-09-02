@@ -5,6 +5,7 @@ import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.sec.role.usr.repository.UserAuthorRepository;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
 import com.demo.spring.usr.dto.UserDTO;
+import com.demo.spring.usr.repository.UserQpository;
 import com.demo.spring.usr.repository.UserRepository;
 import com.demo.spring.usr.vo.User;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	
 	private final UserRepository userRepository;
 	
+	private final UserQpository userQpository;
+	
 	private final UserAuthorRepository userAuthorRepository;
 	
 	@Override
@@ -41,6 +44,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		                                                    .map(SimpleGrantedAuthority::new)
 		                                                    .collect(Collectors.toUnmodifiableList()))
 		                        .build();
+	}
+	
+	public void increaseLoginFailrCnt(UserDTO userDTO) {
+		userQpository.increaseCntLoginFailr(userDTO);
+	}
+	
+	public void initLoginFailrCnt(UserDTO userDTO) {
+		userQpository.initCntLoginFailr(userDTO);
 	}
 	
 }

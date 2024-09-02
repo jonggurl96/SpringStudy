@@ -25,7 +25,6 @@
 		submit.addEventListener("click", () => {
 			const text = document.querySelector("#text").value;
 			fetch(`crypto/${text}`).then(async (response) => {
-				console.log(response);
 				document.querySelector("#cipherText").value = await response.text();
 			});
 		});

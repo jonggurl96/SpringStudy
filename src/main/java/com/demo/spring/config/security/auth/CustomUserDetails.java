@@ -35,4 +35,12 @@ public class CustomUserDetails implements UserDetails {
 		return this.userDTO.getUserNo();
 	}
 	
+	public int getLoginFailrCnt() {
+		return userDTO.getCntLoginFailr();
+	}
+	
+	public boolean isExceedLoginFailrCnt(int maxCnt) {
+		return userDTO.getCntLoginFailr() >= maxCnt;
+	}
+	
 }

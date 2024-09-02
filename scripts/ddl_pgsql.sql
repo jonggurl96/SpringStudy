@@ -19,12 +19,13 @@ ALTER TABLE tc_table_nos
 
 CREATE TABLE tn_users
 (
-	user_no  varchar(20) NOT NULL
+	user_no        varchar(20) NOT NULL
 		CONSTRAINT tn_users_pk
 			PRIMARY KEY,
-	user_id  varchar(20) NOT NULL,
-	username varchar(20) NOT NULL,
-	password text        NOT NULL
+	user_id        varchar(20) NOT NULL,
+	username       varchar(20) NOT NULL,
+	password       text        NOT NULL,
+	cnt_login_failr integer DEFAULT 0
 );
 
 COMMENT ON TABLE tn_users IS '사용자 목록';
@@ -36,6 +37,8 @@ COMMENT ON COLUMN tn_users.user_id IS '사용자 ID';
 COMMENT ON COLUMN tn_users.username IS '사용자 명';
 
 COMMENT ON COLUMN tn_users.password IS '암호';
+
+COMMENT ON COLUMN tn_users.cnt_login_failr IS '로그인 실패 횟수';
 
 ALTER TABLE tn_users
 	OWNER TO jongg;
