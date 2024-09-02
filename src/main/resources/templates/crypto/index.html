@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>암호화 예제 페이지</title>
+</head>
+<body>
+<ul>
+	<li>
+		<label for="text">암호화할 평문 입력: </label>
+		<input type="text" name="text" id="text">
+	</li>
+	<li>
+		<label for="cipherText">암호문: </label>
+		<input type="text" name="cipherText" id="cipherText">
+	</li>
+	<li>
+		<button type="button" id="btn-crypto">암호화</button>
+	</li>
+</ul>
+<script>
+	window.onload = () => {
+		const submit = document.querySelector("#btn-crypto");
+
+		submit.addEventListener("click", () => {
+			const text = document.querySelector("#text").value;
+			fetch(`crypto/${text}`).then(async (response) => {
+				console.log(response);
+				document.querySelector("#cipherText").value = await response.text();
+			});
+		});
+	};
+</script>
+</body>
+</html>

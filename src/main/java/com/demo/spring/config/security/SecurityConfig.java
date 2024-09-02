@@ -67,7 +67,7 @@ public class SecurityConfig {
 		http.formLogin(page -> page.loginPage("/login").permitAll());
 		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/actionLogin", "/login**", "/crypto**").permitAll()
+				.requestMatchers("/actionLogin", "/login**", "/crypto/**").permitAll()
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
