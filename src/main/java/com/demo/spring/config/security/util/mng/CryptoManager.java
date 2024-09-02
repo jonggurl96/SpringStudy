@@ -2,6 +2,7 @@ package com.demo.spring.config.security.util.mng;
 
 
 import com.demo.spring.config.security.exception.dec.CryptoException;
+import com.demo.spring.config.security.vo.CipherTextVO;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.BadPaddingException;
@@ -30,7 +31,7 @@ import java.util.function.Function;
 @Slf4j
 public abstract class CryptoManager {
 	
-	public abstract String decrypt(String text) throws CryptoException;
+	public abstract CipherTextVO decrypt(String text) throws CryptoException;
 	
 	/**
 	 * @param algorithmFullName ${Algorithm Type}/${Operation Mode}/${Padding}

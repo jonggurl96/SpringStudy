@@ -3,6 +3,7 @@ package com.demo.spring.config.security.filter;
 
 import com.demo.spring.config.security.util.mng.RsaAesManager;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
+import com.demo.spring.config.security.vo.CipherTextVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -33,10 +34,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		String password = obtainPassword(request);
 		password = password == null ? "" : password;
 		
-		String decodedPassword = decrypt(request, password);
-		credentials.put("password", decodedPassword);
+		CipherTextVO pwdCipherText = decrypt(request, password);
 		
-		log.debug(">>> username: {}, password: {}", username, password);
+		credentials.put("password", pwdCipherText.text());
+		
+		log.debug(">>> username: {}, password: {}", username, pwdCipherText.cipherText());
 		
 		UsernamePasswordAuthenticationToken authRequst = new UsernamePasswordAuthenticationToken(username,
 		                                                                                         credentials);
@@ -45,7 +47,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		return getAuthenticationManager().authenticate(authRequst);
 	}
 	
-	private String decrypt(HttpServletRequest request, String text) {
+	private CipherTextVO decrypt(HttpServletRequest request, String text) {
 		HttpSession session = request.getSession();
 		RsaAesManager manager = (RsaAesManager) session.getAttribute(rsaAesProperties.getSessionKey());
 		

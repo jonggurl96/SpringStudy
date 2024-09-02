@@ -3,6 +3,7 @@ package com.demo.spring.config.security.util.mng;
 
 import com.demo.spring.config.security.exception.dec.CryptoException;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
+import com.demo.spring.config.security.vo.CipherTextVO;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
@@ -90,7 +91,7 @@ public class RsaAesManager extends CryptoManager {
 	 * @throws CryptoException AES 키, IV가 객체 멤버와 다름
 	 */
 	@Override
-	public String decrypt(String text) throws CryptoException {
+	public CipherTextVO decrypt(String text) throws CryptoException {
 		String[] keyCryptoIv = decryptAesKey_RSA(RSA_PRIVATE_KEY, text);
 		
 		if(!Arrays.equals(base64HexToBytes(keyCryptoIv[0]), AES_SECRET_KEY))
@@ -99,7 +100,7 @@ public class RsaAesManager extends CryptoManager {
 		if(!Arrays.equals(base64HexToBytes(keyCryptoIv[2]), AES_IV))
 			throw new CryptoException("AES IV가 다른 값입니다.");
 		
-		return decryptAES(keyCryptoIv[1]);
+		return new CipherTextVO(decryptAES(keyCryptoIv[1]), keyCryptoIv[1]);
 	}
 	
 	/**

@@ -1,6 +1,7 @@
 package com.demo.spring.config.security;
 
 
+import com.demo.spring.config.security.encoder.AesEncoder;
 import com.demo.spring.config.security.filter.AuthenticationFilter;
 import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.LoginFailureHandler;
@@ -19,7 +20,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,13 +33,13 @@ public class SecurityConfig {
 	private final RsaAesProperties rsaAesProperties;
 	
 	@Bean
-	public BCryptPasswordEncoder bCryptPasswordEncoder() {
-		return new BCryptPasswordEncoder();
+	public AesEncoder aesEncoder() {
+		return new AesEncoder(rsaAesProperties);
 	}
 	
 	@Bean
 	public JpaDaoAuthProvider jpaDaoAuthProvider() {
-		return new JpaDaoAuthProvider(userDetailsService, bCryptPasswordEncoder(), rsaAesProperties);
+		return new JpaDaoAuthProvider(userDetailsService, aesEncoder());
 	}
 	
 	@Bean
@@ -67,7 +67,7 @@ public class SecurityConfig {
 		http.formLogin(page -> page.loginPage("/login").permitAll());
 		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/actionLogin", "/login**").permitAll()
+				.requestMatchers("/actionLogin", "/login**", "/crypto**").permitAll()
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
