@@ -17,7 +17,8 @@ public class ExceptionHandlingController implements ErrorController {
 	@RequestMapping("/error")
 	public void handleError(HttpServletRequest request) throws Throwable {
 		Collections.list(request.getAttributeNames())
-				.forEach(key -> log.error(String.format(">>> %20s: %s", key, request.getAttribute(key).toString())));
+		           .forEach(key -> log.error(String.format(">>> %20s: %s", key,
+		                                                   request.getAttribute(key).toString())));
 		Exception ex = (Exception) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
 		if(ex != null)
 			throw ex;

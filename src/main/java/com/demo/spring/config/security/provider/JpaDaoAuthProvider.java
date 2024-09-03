@@ -2,6 +2,7 @@ package com.demo.spring.config.security.provider;
 
 
 import com.demo.spring.config.security.auth.CustomUserDetails;
+import com.demo.spring.config.security.exception.LoginFailedTooMuchException;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
 import com.demo.spring.config.security.service.UserDetailsServiceImpl;
 import com.demo.spring.usr.dto.UserDTO;
@@ -47,7 +48,9 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 			
 			getService().increaseLoginFailrCnt(userDTO);
 			if(customUserDetails.isExceedLoginFailrCnt(MAX_CO))
-				throw new PasswordNotMatchException(customUserDetails.getLoginFailrCnt(), MAX_CO);
+				throw new LoginFailedTooMuchException("로그인 시도 횟수 초과");
+			
+			throw new PasswordNotMatchException(customUserDetails.getLoginFailrCnt(), MAX_CO);
 		}
 		else getService().initLoginFailrCnt(userDTO);
 	}

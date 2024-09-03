@@ -7,10 +7,11 @@ import com.demo.spring.config.security.exception.NotConfirmedException;
 import com.demo.spring.config.security.exception.PasswordNotMatchException;
 import com.demo.spring.config.security.exception.dec.CryptoException;
 import com.demo.spring.config.security.util.LoginResultCode;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,100 +21,73 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
-@Setter
+@RequiredArgsConstructor
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 	
-	private String forwardUrl;
+	private final String forwardUrl;
 	
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request,
 	                                    HttpServletResponse response,
 	                                    AuthenticationException exception) throws IOException, ServletException {
-		String username = request.getParameter("username");
-		log.error(">>> Username [{}] Login Failed.", username);
-		
-		switch(exception) {
-			case InternalAuthenticationServiceException isae -> {
-				switch(isae.getCause()) {
-					case UsernameNotFoundException ignored ->
-							setForUsernameNotFound(request, "입력한 아이디나 비밀번호에 적합한 사용자가 존재하지 않습니다.");
-					case LoginFailedTooMuchException ignored ->
-							setForLoginFailCoExceed(request, "로그인 시도 횟수를 초과한 계정입니다.");
-					case NotConfirmedException ignored -> setForNotConfirmed(request, "인증이 완료되지 않은 계정입니다.");
-					case AccountExpiredException ignored -> setForExpiredAccount(request, "탈퇴한 사용자입니다.");
-					default -> setForUnknown(request, "알 수 없는 오류가 발생했습니다.");
-				}
-			}
-			case PasswordNotMatchException pnme -> {
-				int tryCnt = pnme.getTryCnt();
-				int maxTryCnt = pnme.getMaxTryCnt();
-				String alertMsg = String.format("로그인 시도가 %d회 초과되었습니다.\n%d회 초과 시 본인인증을 거쳐야만 로그인 가능합니다.",
-				                                tryCnt,
-				                                maxTryCnt);
-				setForPwdNotMatch(request, alertMsg);
-			}
-			case BadCredentialsException ignored -> setForUsernameNotFound(request, "사용자 정보가 정확하지 않습니다.");
-			case UsernameNotFoundException ignored -> setForUsernameNotFound(request, "사용자 정보가 존재하지 않습니다.");
-			case AccountExpiredException ignored -> setForExpiredAccount(request, "탈퇴한 사용자입니다.");
-			case LoginFailedTooMuchException ignored -> setForLoginFailCoExceed(request, "로그인 시도 횟수를 초과한 계정입니다.");
-			case NotConfirmedException ignored -> setForNotConfirmed(request, "인증이 완료되지 않은 계정입니다.");
-			case AccessDeniedException ignored -> setForAccessDenied(request, "접근이 거부되었습니다.");
-			case CryptoException de -> {
-				String encodedPassword = de.getMessage();
-				setForPwdNotMatch(request, "패스워드 복호화에 실패했습니다.");
-				log.error(">>> {}", encodedPassword, de);
-			}
-			default -> setForUnknown(request, "로그인 처리중 문제가 발생하였습니다.");
-		}
-		log.error(">>> code: {}, errMsg: {}", request.getAttribute("code"), request.getAttribute("errMsg"));
-		String errMsg = URLEncoder.encode(request.getAttribute("errMsg").toString(), StandardCharsets.UTF_8);
-		
-		String encodedUrl =
-				response.encodeURL(forwardUrl + "?code=" + request.getAttribute("code") + "&errMsg=" + errMsg);
-		response.sendRedirect(encodedUrl);
+		String errParameter = switch(exception) {
+			case InternalAuthenticationServiceException isae -> switch(isae.getCause()) {
+				case UsernameNotFoundException ignored ->
+						setForUsernameNotFound() + "입력한 아이디나 비밀번호에 적합한 사용자가 존재하지 않습니다.";
+				case LoginFailedTooMuchException ignored -> setForLoginFailCoExceed() + "로그인 시도 횟수를 초과한 계정입니다.";
+				case NotConfirmedException ignored -> setForNotConfirmed() + "인증이 완료되지 않은 계정입니다.";
+				case AccountExpiredException ignored -> setForExpiredAccount() + "탈퇴한 사용자입니다.";
+				default -> setForUnknown(isae) + "알 수 없는 오류가 발생했습니다.";
+			};
+			case PasswordNotMatchException pnme ->
+					setForPwdNotMatch() + String.format("로그인 시도가 %d회 초과되었습니다.\n%d회 초과 시 본인인증을 거쳐야만 로그인 가능합니다.",
+					                                    pnme.getTryCnt(),
+					                                    pnme.getMaxTryCnt());
+			case BadCredentialsException ignored -> setForUsernameNotFound() + "사용자 정보가 정확하지 않습니다.";
+			case UsernameNotFoundException ignored -> setForUsernameNotFound() + "사용자 정보가 존재하지 않습니다.";
+			case AccountExpiredException ignored -> setForExpiredAccount() + "탈퇴한 사용자입니다.";
+			case LoginFailedTooMuchException ignored -> setForLoginFailCoExceed() + "로그인 시도 횟수를 초과한 계정입니다.";
+			case NotConfirmedException ignored -> setForNotConfirmed() + "인증이 완료되지 않은 계정입니다.";
+			case AccessDeniedException ignored -> setForAccessDenied() + "접근이 거부되었습니다.";
+			case CryptoException ignored -> setForPwdNotMatch() + "패스워드 복호화에 실패했습니다.";
+			default -> setForUnknown(exception) + "로그인 처리중 문제가 발생하였습니다.";
+		};
+		RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl + errParameter);
+		dispatcher.forward(request, response);
 	}
 	
-	private void setForUsernameNotFound(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.USERNAME_NOT_FOUND);
-		request.setAttribute("errMsg", message);
+	private String setForUsernameNotFound() {
+		return formatParam(LoginResultCode.USERNAME_NOT_FOUND);
 	}
 	
-	private void setForPwdNotMatch(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.PASSWORD_NOT_MATCH);
-		request.setAttribute("errMsg", message);
+	private String setForPwdNotMatch() {
+		return formatParam(LoginResultCode.PASSWORD_NOT_MATCH);
 	}
 	
-	private void setForExpiredAccount(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.EXPIRED_ACCOUNT);
-		request.setAttribute("errMsg", message);
+	private String setForExpiredAccount() {
+		return formatParam(LoginResultCode.EXPIRED_ACCOUNT);
 	}
 	
-	private void setForLoginFailCoExceed(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.LOGIN_FAILR_COUNT);
-		request.setAttribute("errMsg", message);
+	private String setForLoginFailCoExceed() {
+		return formatParam(LoginResultCode.LOGIN_FAILR_COUNT);
 	}
 	
-	private void setForNotConfirmed(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.VERIFY_NOT_COMPLETE);
-		request.setAttribute("errMsg", message);
+	private String setForNotConfirmed() {
+		return formatParam(LoginResultCode.VERIFY_NOT_COMPLETE);
 	}
 	
-	private void setForAccessDenied(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.ACCESS_DENIED);
-		request.setAttribute("errMsg", message);
+	private String setForAccessDenied() {
+		return formatParam(LoginResultCode.ACCESS_DENIED);
 	}
 	
-	private void setForUnknown(HttpServletRequest request, String message) {
-		request.setAttribute("code", LoginResultCode.UNKNOWN);
-		request.setAttribute("errMsg", message);
+	private String setForUnknown(AuthenticationException exception) {
+		log.error(">>> Login Failed.", exception);
+		return formatParam(LoginResultCode.UNKNOWN);
 	}
 	
-	private void setForSuccess(HttpServletRequest request) {
-		request.setAttribute("code", LoginResultCode.SUCCESS);
+	private String formatParam(String code) {
+		return "?code=" + code + "&errMsg=";
 	}
-	
 }

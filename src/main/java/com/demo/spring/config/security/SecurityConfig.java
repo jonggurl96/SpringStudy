@@ -59,6 +59,10 @@ public class SecurityConfig {
 		return filter;
 	}
 	
+	@Bean
+	public AuthEntryPoint authEntryPoint() {
+		return new AuthEntryPoint();
+	}
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -76,7 +80,7 @@ public class SecurityConfig {
 		http.addFilterBefore(authenticationFilter(authenticationManager(http)),
 		                     UsernamePasswordAuthenticationFilter.class);
 		
-		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login")));
+		http.exceptionHandling(handler -> handler.authenticationEntryPoint(authEntryPoint()));
 
 
 //		http.logout(logout -> logout
@@ -105,9 +109,7 @@ public class SecurityConfig {
 	
 	@Bean
 	public LoginFailureHandler loginFailureHandler() {
-		LoginFailureHandler loginFailureHandler = new LoginFailureHandler();
-		loginFailureHandler.setForwardUrl("/login");
-		return loginFailureHandler;
+		return new LoginFailureHandler("/loginError");
 	}
 	
 }
