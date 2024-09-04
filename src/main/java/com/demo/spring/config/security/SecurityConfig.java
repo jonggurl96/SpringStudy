@@ -61,24 +61,29 @@ public class SecurityConfig {
 	
 	@Bean
 	public AuthEntryPoint authEntryPoint() {
-		return new AuthEntryPoint();
+		return new AuthEntryPoint("/login");
 	}
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable);
 		
-		http.formLogin(page -> page.loginPage("/login").permitAll());
+		http.formLogin(page -> page.loginPage("/login")
+		                           .loginProcessingUrl("/actionLogin")
+		                           .defaultSuccessUrl("/main", true)
+		                           .usernameParameter("username")
+		                           .passwordParameter("password")
+		                           .permitAll());
 		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/actionLogin", "/login**", "/crypto/**").permitAll()
+				.requestMatchers("/actionLogin**", "/login**", "/crypto/**", "/loginError**").permitAll()
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
 				.anyRequest().authenticated());
 		
-		http.addFilterBefore(authenticationFilter(authenticationManager(http)),
-		                     UsernamePasswordAuthenticationFilter.class);
+		http.addFilterAt(authenticationFilter(authenticationManager(http)),
+		                 UsernamePasswordAuthenticationFilter.class);
 		
 		http.exceptionHandling(handler -> handler.authenticationEntryPoint(authEntryPoint()));
 

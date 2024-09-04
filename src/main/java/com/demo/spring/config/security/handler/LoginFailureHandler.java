@@ -54,6 +54,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 			case CryptoException ignored -> setForPwdNotMatch() + "패스워드 복호화에 실패했습니다.";
 			default -> setForUnknown(exception) + "로그인 처리중 문제가 발생하였습니다.";
 		};
+		
 		RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl + errParameter);
 		dispatcher.forward(request, response);
 	}
@@ -90,4 +91,5 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 	private String formatParam(String code) {
 		return "?code=" + code + "&errMsg=";
 	}
+	
 }
