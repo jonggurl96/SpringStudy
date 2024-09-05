@@ -44,6 +44,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		                                                                                         credentials);
 		setDetails(request, authRequst);
 		log.debug(">>> authRequest: {}", authRequst);
+		
 		return getAuthenticationManager().authenticate(authRequst);
 	}
 	

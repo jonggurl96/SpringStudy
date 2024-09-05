@@ -1,6 +1,7 @@
 package com.demo.spring.config.security;
 
 
+import com.demo.spring.config.jwt.filter.JwtFilter;
 import com.demo.spring.config.security.encoder.AesEncoder;
 import com.demo.spring.config.security.filter.AuthenticationFilter;
 import com.demo.spring.config.security.handler.AuthEntryPoint;
@@ -31,6 +32,8 @@ public class SecurityConfig {
 	private final UserDetailsService userDetailsService;
 	
 	private final RsaAesProperties rsaAesProperties;
+	
+	private final JwtFilter jwtFilter;
 	
 	@Bean
 	public AesEncoder aesEncoder() {
@@ -66,7 +69,12 @@ public class SecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		
+		// CSRF 방지
 		http.csrf(AbstractHttpConfigurer::disable);
+		
+		// 기본적인 http 로그인 방식 미사용
+		http.httpBasic(AbstractHttpConfigurer::disable);
 		
 		http.formLogin(page -> page.loginPage("/login")
 		                           .loginProcessingUrl("/actionLogin")
@@ -84,6 +92,7 @@ public class SecurityConfig {
 		
 		http.addFilterAt(authenticationFilter(authenticationManager(http)),
 		                 UsernamePasswordAuthenticationFilter.class);
+		http.addFilterAfter(jwtFilter, AuthenticationFilter.class);
 		
 		http.exceptionHandling(handler -> handler.authenticationEntryPoint(authEntryPoint()));
 
@@ -98,7 +107,7 @@ public class SecurityConfig {
 		http.sessionManagement(configurer -> configurer
 				.sessionFixation()
 				.changeSessionId()
-				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
 	}
 	

@@ -21,6 +21,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
 		log.debug(">>> Authentication SUCCESS.");
+		
 		super.onAuthenticationSuccess(request, response, chain, authentication);
 	}
 	

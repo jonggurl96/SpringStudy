@@ -2,13 +2,14 @@ package com.demo.spring.config.jwt.provider;
 
 
 import com.demo.spring.config.jwt.exception.InvalidTokenException;
-import com.demo.spring.config.jwt.util.RequestHeaderWrapper;
 import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.usr.dto.UserDTO;
 import io.jsonwebtoken.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.KeyPair;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
  * @since 24. 7. 18.
  */
 @Slf4j
+@Getter
 @Component
 public class JwtProvider {
 	
@@ -55,9 +57,13 @@ public class JwtProvider {
 	
 	private final PublicKey PUBLIC_KEY;
 	
-	private final String CHAINING = "||>";
+	private static final String CHAINING = "||>";
 	
-	private final String AUTHORITIES = "authorities";
+	private static final String AUTHORITIES = "authorities";
+	
+	private static final String IP = "IP_Address";
+	
+	private static final String SESSIONID = "SESSION_ID";
 	
 	public JwtProvider() {
 		KeyPair keyPair = Jwts.SIG.RS256.keyPair().build();
@@ -65,38 +71,36 @@ public class JwtProvider {
 		PUBLIC_KEY = keyPair.getPublic();
 	}
 	
-	//	@SuppressWarnings({"unchecked"})
 	public String fromAuthentication(Authentication authentication) {
-//		TODO Map<String, String> credentials = (Map<String, String>) authentication.getCredentials();
 		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 		UserDTO userDTO = customUserDetails.getUserDTO();
 		String authorities = customUserDetails.getAuthorities()
-				.stream().map(Object::toString).sorted().collect(Collectors.joining(CHAINING));
+		                                      .stream()
+		                                      .map(Object::toString)
+		                                      .sorted()
+		                                      .collect(Collectors.joining(CHAINING));
+		
+		WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
 		
 		return PREFIX + getBuilder(userDTO.getUserNo())
 				.claim(AUTHORITIES, authorities)
+				.claim(IP, details.getRemoteAddress())
+				.claim(SESSIONID, details.getSessionId())
 				.compact();
 	}
 	
-	public RequestHeaderWrapper setAuthorization(Authentication authentication,
-	                                             RequestHeaderWrapper requestHeaderWrapper) {
-		return requestHeaderWrapper.addHeader(HEADER, fromAuthentication(authentication));
-	}
-	
 	public String update(String accessToken,
-	                     Authentication authentication,
-	                     RequestHeaderWrapper requestHeaderWrapper) throws InvalidTokenException {
+	                     Authentication authentication) throws InvalidTokenException {
 		
-		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 		String parsedToken = accessToken.replace(PREFIX, "");
 		
 		try {
 			Claims claims = Jwts.parser()
-					.verifyWith(PUBLIC_KEY)
-					.build()
-					.parseSignedClaims(parsedToken)
-					.getPayload();
-			if(validateUserDetails(claims, customUserDetails))
+			                    .verifyWith(PUBLIC_KEY)
+			                    .build()
+			                    .parseSignedClaims(parsedToken)
+			                    .getPayload();
+			if(validateUserDetails(claims, authentication))
 				return accessToken;
 			return fromAuthentication(authentication);
 			
@@ -106,7 +110,6 @@ public class JwtProvider {
 			String updateToken = fromAuthentication(authentication);
 			log.debug(">>> UPdated Token: {}", updateToken);
 			
-			requestHeaderWrapper.addHeader(HEADER, updateToken);
 			return updateToken;
 			
 		} catch(UnsupportedJwtException ignored) {
@@ -131,10 +134,10 @@ public class JwtProvider {
 	private JwtBuilder getBuilder(String userNo) {
 		Date now = getNow();
 		return Jwts.builder()
-				.subject(userNo)
-				.issuedAt(now)
-				.expiration(getExpired(now))
-				.signWith(PRIVATE_KEY);
+		           .subject(userNo)
+		           .issuedAt(now)
+		           .expiration(getExpired(now))
+		           .signWith(PRIVATE_KEY);
 	}
 	
 	private boolean validateUser(Claims claims, UserDTO userDTO) {
@@ -143,15 +146,31 @@ public class JwtProvider {
 		return true;
 	}
 	
-	private boolean validateUserDetails(Claims claims, CustomUserDetails customUserDetails) {
+	private boolean validateUserDetails(Claims claims, Authentication authentication) {
+		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+		WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
 		if(!validateUser(claims, customUserDetails.getUserDTO()))
 			return false;
-		// TODO credential 검사 추가
+		
+		return checkIP(claims, details)
+		       && checkSession(claims, details)
+		       && checkAuthorities(claims, customUserDetails);
+	}
+	
+	private boolean checkAuthorities(Claims claims, CustomUserDetails customUserDetails) {
 		return customUserDetails.getAuthorities().stream()
-				.map(Object::toString)
-				.sorted()
-				.collect(Collectors.joining(CHAINING))
-				.equals(claims.get(AUTHORITIES));
+		                        .map(Object::toString)
+		                        .sorted()
+		                        .collect(Collectors.joining(CHAINING))
+		                        .equals(claims.get(AUTHORITIES));
+	}
+	
+	private boolean checkIP(Claims claims, WebAuthenticationDetails details) {
+		return claims.get(IP, String.class).equals(details.getRemoteAddress());
+	}
+	
+	private boolean checkSession(Claims claims, WebAuthenticationDetails details) {
+		return claims.get(SESSIONID, String.class).equals(details.getSessionId());
 	}
 	
 }
