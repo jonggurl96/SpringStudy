@@ -1,12 +1,12 @@
 package com.demo.spring.config.security;
 
 
-import com.demo.spring.config.jwt.filter.JwtFilter;
 import com.demo.spring.config.security.encoder.AesEncoder;
 import com.demo.spring.config.security.filter.AuthenticationFilter;
 import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.LoginFailureHandler;
 import com.demo.spring.config.security.handler.LoginSuccessHandler;
+import com.demo.spring.config.security.handler.LogoutSuccessHandler;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,6 +22,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -33,38 +34,23 @@ public class SecurityConfig {
 	
 	private final RsaAesProperties rsaAesProperties;
 	
-	private final JwtFilter jwtFilter;
-	
 	@Bean
 	public AesEncoder aesEncoder() {
 		return new AesEncoder(rsaAesProperties);
 	}
 	
 	@Bean
-	public JpaDaoAuthProvider jpaDaoAuthProvider() {
+	public JpaDaoAuthProvider provider() {
 		return new JpaDaoAuthProvider(userDetailsService, aesEncoder());
 	}
 	
-	@Bean
-	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-		return http.getSharedObject(AuthenticationManagerBuilder.class)
-		           .authenticationProvider(jpaDaoAuthProvider())
-		           .build();
-	}
-	
-	@Bean
-	public AuthenticationFilter authenticationFilter(AuthenticationManager authenticationManager) throws Exception {
+	public AuthenticationFilter authenticationFilter() throws Exception {
 		AuthenticationFilter filter = new AuthenticationFilter(rsaAesProperties);
 		filter.setFilterProcessesUrl("/actionLogin");
-		filter.setAuthenticationManager(authenticationManager);
-		filter.setAuthenticationSuccessHandler(loginSuccessHandler());
-		filter.setAuthenticationFailureHandler(loginFailureHandler());
+		filter.setAuthenticationManager(new ProviderManager(List.of(provider())));
+		filter.setAuthenticationSuccessHandler(new LoginSuccessHandler("/main"));
+		filter.setAuthenticationFailureHandler(new LoginFailureHandler("/loginError"));
 		return filter;
-	}
-	
-	@Bean
-	public AuthEntryPoint authEntryPoint() {
-		return new AuthEntryPoint("/login");
 	}
 	
 	@Bean
@@ -84,46 +70,34 @@ public class SecurityConfig {
 		                           .permitAll());
 		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/actionLogin**", "/login**", "/crypto/**", "/loginError**").permitAll()
+				.requestMatchers("/crypto/**", "/loginError**").permitAll()
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
 				.anyRequest().authenticated());
 		
-		http.addFilterAt(authenticationFilter(authenticationManager(http)),
-		                 UsernamePasswordAuthenticationFilter.class);
-		http.addFilterAfter(jwtFilter, AuthenticationFilter.class);
+		http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 		
-		http.exceptionHandling(handler -> handler.authenticationEntryPoint(authEntryPoint()));
+		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login")));
 
 
-//		http.logout(logout -> logout
-//				.logoutUrl("/logout")
-//				.permitAll()
-//				.clearAuthentication(true)
-//				.invalidateHttpSession(true)
-//				.logoutSuccessHandler(null));
+		http.logout(logout -> logout
+				.logoutUrl("/logout")
+				.permitAll()
+				.clearAuthentication(true)
+				.invalidateHttpSession(true)
+				.logoutSuccessHandler(new LogoutSuccessHandler("/login")));
 		
 		http.sessionManagement(configurer -> configurer
 				.sessionFixation()
 				.changeSessionId()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 		return http.build();
 	}
 	
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		return web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
-	}
-	
-	@Bean
-	public LoginSuccessHandler loginSuccessHandler() {
-		return new LoginSuccessHandler("/main");
-	}
-	
-	@Bean
-	public LoginFailureHandler loginFailureHandler() {
-		return new LoginFailureHandler("/loginError");
 	}
 	
 }

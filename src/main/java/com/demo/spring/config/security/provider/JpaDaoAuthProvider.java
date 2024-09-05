@@ -47,10 +47,11 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		if(!encoder.matches(decodedPassword, customUserDetails.getPassword())) {
 			
 			getService().increaseLoginFailrCnt(userDTO);
+			int increasedCnt = customUserDetails.getLoginFailrCnt() + 1;
 			if(customUserDetails.isExceedLoginFailrCnt(MAX_CO))
 				throw new LoginFailedTooMuchException("로그인 시도 횟수 초과");
 			
-			throw new PasswordNotMatchException(customUserDetails.getLoginFailrCnt(), MAX_CO);
+			throw new PasswordNotMatchException(increasedCnt, MAX_CO);
 		}
 		else getService().initLoginFailrCnt(userDTO);
 	}
