@@ -1,8 +1,8 @@
 package com.demo.spring.config.security.web;
 
 
-import com.demo.spring.config.security.encoder.AesEncoder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequiredArgsConstructor
 public class CryptoController {
 	
-	private final AesEncoder aesEncoder;
+	private final PasswordEncoder passwordEncoder;
 	
 	@GetMapping("/crypto")
 	public String cryptoPage() {
@@ -22,6 +22,7 @@ public class CryptoController {
 	@GetMapping("/crypto/{text}")
 	@ResponseBody
 	public String encryptText(@PathVariable String text) {
-		return aesEncoder.encode(text);
+		return passwordEncoder.encode(text);
 	}
+	
 }

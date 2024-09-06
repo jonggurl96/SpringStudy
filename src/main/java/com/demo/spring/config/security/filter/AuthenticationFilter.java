@@ -15,7 +15,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,19 +25,17 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 		String username = obtainUsername(request);
-		if(username == null || username.isBlank())
-			username = "";
-		username = username.trim();
+		username = username == null ? "" : username.trim();
 		
-		Map<String, Object> credentials = new HashMap<>();
 		String password = obtainPassword(request);
 		password = password == null ? "" : password;
 		
 		CipherTextVO pwdCipherText = decrypt(request, password);
 		
-		credentials.put("password", pwdCipherText.text());
-		
 		log.debug(">>> username: {}, password: {}", username, pwdCipherText.cipherText());
+		
+		HashMap<String, String> credentials = HashMap.newHashMap(8);
+		credentials.put("password", pwdCipherText.text());
 		
 		UsernamePasswordAuthenticationToken authRequst = new UsernamePasswordAuthenticationToken(username,
 		                                                                                         credentials);

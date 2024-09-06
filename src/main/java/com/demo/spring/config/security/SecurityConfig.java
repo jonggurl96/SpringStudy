@@ -1,11 +1,11 @@
 package com.demo.spring.config.security;
 
 
-import com.demo.spring.config.security.encoder.AesEncoder;
 import com.demo.spring.config.security.filter.AuthenticationFilter;
 import com.demo.spring.config.security.handler.*;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -17,6 +17,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -32,13 +34,13 @@ public class SecurityConfig {
 	private final RsaAesProperties rsaAesProperties;
 	
 	@Bean
-	public AesEncoder aesEncoder() {
-		return new AesEncoder(rsaAesProperties);
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 	
 	@Bean
 	public JpaDaoAuthProvider provider() {
-		return new JpaDaoAuthProvider(userDetailsService, aesEncoder());
+		return new JpaDaoAuthProvider(userDetailsService, passwordEncoder());
 	}
 	
 	public ProviderManager providerManager() {
@@ -75,6 +77,7 @@ public class SecurityConfig {
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")
+				.dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
 				.anyRequest().authenticated());
 		
 		http.addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -93,6 +96,7 @@ public class SecurityConfig {
 				.sessionFixation()
 				.changeSessionId()
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+		
 		return http.build();
 	}
 	

@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
@@ -36,15 +36,14 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	protected void additionalAuthenticationChecks(UserDetails userDetails,
 	                                              UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
 		CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-		HashMap<String, Object> credentials = (HashMap<String, Object>) authentication.getCredentials();
+		Map<String, String> credentials = (Map<String, String>) authentication.getCredentials();
 		
-		String decodedPassword = (String) credentials.get("password");
-		log.debug(">>> Decoded Password. {}", decodedPassword);
+		String inputPwd = credentials.get("password");
+		log.debug(">>> Password User Wrote. {}", inputPwd);
 		
 		UserDTO userDTO = customUserDetails.getUserDTO();
 		
-		PasswordEncoder encoder = getPasswordEncoder();
-		if(!encoder.matches(decodedPassword, customUserDetails.getPassword())) {
+		if(!getPasswordEncoder().matches(inputPwd, customUserDetails.getPassword())) {
 			
 			getService().increaseLoginFailrCnt(userDTO);
 			int increasedCnt = customUserDetails.getLoginFailrCnt() + 1;
@@ -53,7 +52,9 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 			
 			throw new PasswordNotMatchException(increasedCnt, MAX_CO);
 		}
-		else getService().initLoginFailrCnt(userDTO);
+		else {
+			getService().initLoginFailrCnt(userDTO);
+		}
 	}
 	
 	private UserDetailsServiceImpl getService() {
