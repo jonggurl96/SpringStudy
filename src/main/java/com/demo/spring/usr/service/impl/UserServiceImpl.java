@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void increaseCntLoginFailr(UserDTO userDTO) {
 		int presentCnt = userDTO.getCntLoginFailr();
-		log.debug(">>> [QDSL] Increase User {} Login Failure Count {} to {}",
+		log.debug(">>> [QDSL] User {} Increase Login Failure Count {} to {}",
 		          userDTO.getUserNo(),
 		          presentCnt,
 		          presentCnt + 1);
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void initCntLoginFailr(UserDTO userDTO) {
-		log.debug(">>> [QDSL] Init User {} Login Failure Count", userDTO.getUserNo());
+		log.debug(">>> [QDSL] User {} Init Login Failure Count", userDTO.getUserNo());
 		userRepository.initCntLoginFailr(userDTO);
 	}
 	
