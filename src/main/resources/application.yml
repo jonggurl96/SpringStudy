@@ -41,11 +41,8 @@ logging:
     com.demo.spring: debug
     com.zaxxer.hikari: info
     javax.sql.DataSource: off
-    jdbc.audit: off
-    jdbc.connection: off
-    jdbc.resultset: off
+    jdbc: off
     jdbc.resultsettable: info
-    jdbc.sqlonly: off
     jdbc.sqltiming: info
     org.apache.tomcat: off
     org.hibernate: info
