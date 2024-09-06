@@ -1,29 +1,51 @@
 package com.demo.spring.usr.repository;
 
 
+import com.demo.spring.usr.dto.UserDTO;
+import com.demo.spring.usr.repository.jpa.UserJpository;
+import com.demo.spring.usr.repository.qdsl.UserQpository;
 import com.demo.spring.usr.vo.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-public interface UserRepository extends JpaRepository<User, String> {
+/**
+ * UserRepository.java
+ * <pre>
+ * User Entity Repository Structure
+ * </pre>
+ *
+ * @author jongg
+ * @version 1.0.0
+ * @since 24. 9. 6.
+ */
+@Component
+@RequiredArgsConstructor
+public class UserRepository {
 	
 	/**
-	 * {@snippet: SELECT * FROM tn_users WHERE user_id = :userId}
-	 *
-	 * @param userId
-	 *
-	 * @return
-	 *
-	 * @throws Exception
+	 * JPA Repository
 	 */
-	public User findByUserId(String userId);
+	private final UserJpository userJpository;
 	
 	/**
-	 * {@snippet: SELECT * FROM tn_users WHERE user_no = :userNo}
-	 *
-	 * @param userNo
-	 *
-	 * @return
+	 * Query DSL Repository
 	 */
-	public User findByUserNo(String userNo);
+	private final UserQpository userQpository;
+	
+	public User findByUserId(String userId) {
+		return userJpository.findByUserId(userId);
+	}
+	
+	public User findByUserNo(String userNo) {
+		return userJpository.findByUserNo(userNo);
+	}
+	
+	public void increaseCntLoginFailr(UserDTO userDTO) {
+		userQpository.increaseCntLoginFailr(userDTO);
+	}
+	
+	public void initCntLoginFailr(UserDTO userDTO) {
+		userQpository.initCntLoginFailr(userDTO);
+	}
 	
 }

@@ -1,4 +1,4 @@
-package com.demo.spring.usr.repository;
+package com.demo.spring.usr.repository.qdsl;
 
 
 import com.demo.spring.usr.dto.UserDTO;

@@ -3,6 +3,8 @@ package com.demo.spring.usr.service.impl;
 
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.usr.repository.UserRepository;
+import com.demo.spring.usr.repository.jpa.UserJpository;
+import com.demo.spring.usr.repository.qdsl.UserQpository;
 import com.demo.spring.usr.service.UserService;
 import com.demo.spring.usr.vo.User;
 import lombok.RequiredArgsConstructor;
@@ -17,31 +19,51 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	
 	/**
-	 * userId, pwd를 입력받아 로그인
+	 * @param userId
 	 *
-	 * @param userDTO
-	 *
-	 * @return
-	 *
-	 * @throws Exception
+	 * @see UserJpository#findByUserId(String)
 	 */
 	@Override
-	public void login(UserDTO userDTO) throws Exception {
-		User user = userRepository.findByUserId(userDTO.getUserId());
-//		if(user.getPassword().equals(encPwd(userDTO.getPwd())))
-//			return new UserDTO(user);
-//		throw new RuntimeException("Failed Log In.");
+	public User findByUserId(String userId) {
+		log.debug(">>> [JPA] Find Entity User By user_id {}", userId);
+		return userRepository.findByUserId(userId);
 	}
 	
 	/**
-	 * 사용자가 입력한 pwd를 암호화
+	 * @param userNo
 	 *
-	 * @param pwd
-	 *
-	 * @return
+	 * @see UserJpository#findByUserNo(String)
 	 */
-	private String encPwd(String pwd) {
-		return pwd;
+	@Override
+	public User findByUserNo(String userNo) {
+		log.debug(">>> [JPA] Find Entity User By user_no {}", userNo);
+		return userRepository.findByUserNo(userNo);
+	}
+	
+	/**
+	 * @param userDTO
+	 *
+	 * @see UserQpository#increaseCntLoginFailr(UserDTO)
+	 */
+	@Override
+	public void increaseCntLoginFailr(UserDTO userDTO) {
+		int presentCnt = userDTO.getCntLoginFailr();
+		log.debug(">>> [QDSL] Increase User {} Login Failure Count {} to {}",
+		          userDTO.getUserNo(),
+		          presentCnt,
+		          presentCnt + 1);
+		userRepository.increaseCntLoginFailr(userDTO);
+	}
+	
+	/**
+	 * @param userDTO
+	 *
+	 * @see UserQpository#initCntLoginFailr(UserDTO)
+	 */
+	@Override
+	public void initCntLoginFailr(UserDTO userDTO) {
+		log.debug(">>> [QDSL] Init User {} Login Failure Count", userDTO.getUserNo());
+		userRepository.initCntLoginFailr(userDTO);
 	}
 	
 }

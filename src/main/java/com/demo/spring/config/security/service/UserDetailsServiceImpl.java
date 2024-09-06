@@ -5,8 +5,7 @@ import com.demo.spring.config.security.auth.CustomUserDetails;
 import com.demo.spring.sec.role.usr.repository.UserAuthorRepository;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
 import com.demo.spring.usr.dto.UserDTO;
-import com.demo.spring.usr.repository.UserQpository;
-import com.demo.spring.usr.repository.UserRepository;
+import com.demo.spring.usr.service.UserService;
 import com.demo.spring.usr.vo.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +23,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 	
-	private final UserRepository userRepository;
-	
-	private final UserQpository userQpository;
+	private final UserService userService;
 	
 	private final UserAuthorRepository userAuthorRepository;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = userRepository.findByUserId(username);
+		User user = userService.findByUserId(username);
 		if(user == null)
 			throw new UsernameNotFoundException("User Name " + username + "Not found Exception occured.");
 		UserDTO userDTO = new UserDTO(user);
@@ -47,11 +44,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	}
 	
 	public void increaseLoginFailrCnt(UserDTO userDTO) {
-		userQpository.increaseCntLoginFailr(userDTO);
+		userService.increaseCntLoginFailr(userDTO);
 	}
 	
 	public void initLoginFailrCnt(UserDTO userDTO) {
-		userQpository.initCntLoginFailr(userDTO);
+		userService.initCntLoginFailr(userDTO);
 	}
 	
 }

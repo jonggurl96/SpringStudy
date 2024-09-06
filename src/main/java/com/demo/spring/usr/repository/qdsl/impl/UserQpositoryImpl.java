@@ -1,7 +1,8 @@
-package com.demo.spring.usr.repository;
+package com.demo.spring.usr.repository.qdsl.impl;
 
 
 import com.demo.spring.usr.dto.UserDTO;
+import com.demo.spring.usr.repository.qdsl.UserQpository;
 import com.demo.spring.usr.vo.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
