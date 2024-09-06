@@ -3,10 +3,7 @@ package com.demo.spring.config.security;
 
 import com.demo.spring.config.security.encoder.AesEncoder;
 import com.demo.spring.config.security.filter.AuthenticationFilter;
-import com.demo.spring.config.security.handler.AuthEntryPoint;
-import com.demo.spring.config.security.handler.LoginFailureHandler;
-import com.demo.spring.config.security.handler.LoginSuccessHandler;
-import com.demo.spring.config.security.handler.LogoutSuccessHandler;
+import com.demo.spring.config.security.handler.*;
 import com.demo.spring.config.security.provider.JpaDaoAuthProvider;
 import com.demo.spring.config.security.util.properties.RsaAesProperties;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +41,14 @@ public class SecurityConfig {
 		return new JpaDaoAuthProvider(userDetailsService, aesEncoder());
 	}
 	
+	public ProviderManager providerManager() {
+		return new ProviderManager(List.of(provider()));
+	}
+	
 	public AuthenticationFilter authenticationFilter() throws Exception {
 		AuthenticationFilter filter = new AuthenticationFilter(rsaAesProperties);
 		filter.setFilterProcessesUrl("/actionLogin");
-		filter.setAuthenticationManager(new ProviderManager(List.of(provider())));
+		filter.setAuthenticationManager(providerManager());
 		filter.setAuthenticationSuccessHandler(new LoginSuccessHandler("/main"));
 		filter.setAuthenticationFailureHandler(new LoginFailureHandler("/loginError"));
 		return filter;
@@ -76,11 +77,11 @@ public class SecurityConfig {
 				.requestMatchers("/api/b/**").hasRole("B")
 				.anyRequest().authenticated());
 		
-		http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 		
-		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login")));
-
-
+		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login"))
+		                                         .accessDeniedHandler(new CustomAcessDeniedHandler()));
+		
 		http.logout(logout -> logout
 				.logoutUrl("/logout")
 				.permitAll()
