@@ -2,8 +2,8 @@ spring:
   application:
     name: SpringStudy
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/springstudy
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:postgresql://localhost:5432/springstudy
     username: jongg
     password: jongg
   thymeleaf:
@@ -38,13 +38,22 @@ server:
 logging:
   level:
     root: info
-    org.thymeleaf: info
     com.demo.spring: debug
+    com.zaxxer.hikari: info
+    javax.sql.DataSource: off
+    jdbc.audit: off
+    jdbc.connection: off
+    jdbc.resultset: off
+    jdbc.resultsettable: info
+    jdbc.sqlonly: off
+    jdbc.sqltiming: info
     org.apache.tomcat: off
-    org.springframework.boot: info
-    org.postgresql: info
     org.hibernate: info
+    org.hibernate.sql: debug
     org.hibernate.orm.jdbc.bind: trace
+    org.postgresql: info
+    org.springframework.boot: info
+    org.thymeleaf: info
   pattern:
     dateformat: "yyyy-MM-dd HH:mm:ss.SSS"
     console: "%clr(%d){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
