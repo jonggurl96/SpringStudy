@@ -50,6 +50,7 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     org.postgresql: info
     org.springframework.boot: info
+    org.springframework.security: debug
     org.thymeleaf: info
   pattern:
     dateformat: "yyyy-MM-dd HH:mm:ss.SSS"

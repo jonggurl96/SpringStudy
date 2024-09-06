@@ -65,15 +65,9 @@ public class SecurityConfig {
 		// 기본적인 http 로그인 방식 미사용
 		http.httpBasic(AbstractHttpConfigurer::disable);
 		
-		http.formLogin(page -> page.loginPage("/login")
-		                           .loginProcessingUrl("/actionLogin")
-		                           .defaultSuccessUrl("/main", true)
-		                           .usernameParameter("username")
-		                           .passwordParameter("password")
-		                           .permitAll());
-		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/crypto/**", "/loginError**").permitAll()
+				.requestMatchers("/crypto/**", "/loginError**", "/login", "/actionLogin").permitAll()
+				.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")
 				.requestMatchers("/api/b/**").hasRole("B")

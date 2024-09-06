@@ -33,16 +33,17 @@ public class LoginController extends AbstractController {
 	
 	@GetMapping("/loginError")
 	public String redirectLoginPage(@RequestParam("code") String code,
-	                               @RequestParam("errMsg") String errMsg,
-	                               RedirectAttributes rttr) {
+	                                @RequestParam("errMsg") String errMsg,
+	                                RedirectAttributes rttr) {
 		rttr.addFlashAttribute("code", code)
 		    .addFlashAttribute("errMsg", errMsg);
 		return "redirect:/login";
 	}
 	
 	@GetMapping("/main")
-	public String mainPage(@AuthenticatedUser UserDTO userDTO) throws Exception {
+	public String mainPage(@AuthenticatedUser UserDTO userDTO, Model model) throws Exception {
 		log.debug(">>> main. {}", userDTO);
+		model.addAttribute("userDTO", userDTO);
 		return "/main";
 	}
 	
