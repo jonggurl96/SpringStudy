@@ -39,7 +39,7 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		Map<String, String> credentials = (Map<String, String>) authentication.getCredentials();
 		
 		String inputPwd = credentials.get("password");
-		log.debug(">>> Password User Wrote. {}", inputPwd);
+		log.debug(">>> Password User Input. {}", inputPwd);
 		
 		UserDTO userDTO = customUserDetails.getUserDTO();
 		
@@ -54,6 +54,9 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		}
 		else {
 			getService().initLoginFailrCnt(userDTO);
+			
+			// TODO - jwt token 생성 후 eraseCredentials();
+			authentication.eraseCredentials();
 		}
 	}
 	

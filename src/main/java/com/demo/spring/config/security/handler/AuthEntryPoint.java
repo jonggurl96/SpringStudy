@@ -32,7 +32,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
 	public void commence(HttpServletRequest request,
 	                     HttpServletResponse response,
 	                     AuthenticationException authException) throws IOException, ServletException {
-		log.debug(">>> 인증되지 않은 사용자 접근. 로그인 페이지로 이동");
+		log.error(">>> 인증되지 않은 사용자 접근. 로그인 페이지로 이동", authException);
 		response.sendRedirect(loginPage);
 	}
 	
