@@ -1,6 +1,8 @@
 package com.demo.spring.config.security;
 
 
+import com.demo.spring.config.jwt.filter.JwtFilter;
+import com.demo.spring.config.jwt.provider.JwtProvider;
 import com.demo.spring.config.security.filter.AuthenticationFilter;
 import com.demo.spring.config.security.handler.AuthEntryPoint;
 import com.demo.spring.config.security.handler.CustomAcessDeniedHandler;
@@ -26,10 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
-import org.springframework.security.web.context.DelegatingSecurityContextRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 import java.util.List;
 
@@ -42,6 +41,8 @@ public class SecurityConfig {
 	
 	private final RsaAesProperties rsaAesProperties;
 	
+	private final JwtProvider jwtProvider;
+	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -53,9 +54,7 @@ public class SecurityConfig {
 	}
 	
 	public ProviderManager providerManager() {
-		ProviderManager manager = new ProviderManager(List.of(provider()));
-		manager.setEraseCredentialsAfterAuthentication(false);
-		return manager;
+		return new ProviderManager(List.of(provider()));
 	}
 	
 	public AuthenticationFilter authenticationFilter() throws Exception {
@@ -67,6 +66,10 @@ public class SecurityConfig {
 		filter.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy());
 		filter.setAllowSessionCreation(false);
 		return filter;
+	}
+	
+	public JwtFilter jwtFilter() {
+		return new JwtFilter(jwtProvider);
 	}
 	
 	@Bean
@@ -89,15 +92,11 @@ public class SecurityConfig {
 				.requestMatchers("/api/b/**").hasRole("B")
 				.dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
 				.anyRequest().authenticated());
+
+		http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+		    .addFilterAfter(jwtFilter(), AuthenticationFilter.class);
 		
-		http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-		
-		http.addFilterBefore(new SecurityContextHolderFilter(new HttpSessionSecurityContextRepository()),
-		                     AuthenticationFilter.class);
-		
-		http.securityContext(context -> context.securityContextRepository(
-				                                       new DelegatingSecurityContextRepository(new HttpSessionSecurityContextRepository(),
-				                                                                               new RequestAttributeSecurityContextRepository()))
+		http.securityContext(context -> context.securityContextRepository(new HttpSessionSecurityContextRepository())
 		                                       .requireExplicitSave(true));
 		
 		http.exceptionHandling(handler -> handler.authenticationEntryPoint(new AuthEntryPoint("/login"))

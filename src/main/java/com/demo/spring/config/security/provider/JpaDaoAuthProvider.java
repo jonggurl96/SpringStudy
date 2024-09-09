@@ -26,7 +26,8 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 	@Value("${login.maxTryNo}")
 	private int MAX_CO;
 	
-	public JpaDaoAuthProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+	public JpaDaoAuthProvider(UserDetailsService userDetailsService,
+	                          PasswordEncoder passwordEncoder) {
 		super(passwordEncoder);
 		setUserDetailsService(userDetailsService);
 	}
@@ -54,9 +55,6 @@ public class JpaDaoAuthProvider extends DaoAuthenticationProvider {
 		}
 		else {
 			getService().initLoginFailrCnt(userDTO);
-			
-			// TODO - jwt token 생성 후 eraseCredentials();
-			authentication.eraseCredentials();
 		}
 	}
 	
