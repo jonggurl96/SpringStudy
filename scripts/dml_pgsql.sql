@@ -62,6 +62,9 @@ VALUES (
 	       'USER_9999999999999', 'ROLE_ANONYMOUS'
        ),
        (
+	       'USER_9999999999999', 'ROLE_ADMIN'
+       ),
+       (
 	       'USER_0000000000001', 'ROLE_ANONYMOUS'
        ),
        (

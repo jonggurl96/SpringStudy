@@ -9,9 +9,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 
 @EnableWebSecurity
 @EnableAspectJAutoProxy
-@ConfigurationPropertiesScan(basePackages = {
-		"com.demo.spring.config.security.util.properties"
-})
+@ConfigurationPropertiesScan(
+		basePackages = {
+				"com.demo.spring.config.security.util.properties"
+		})
 @SpringBootApplication(scanBasePackages = "com.demo.spring")
 public class SpringStudyApplication {
 	

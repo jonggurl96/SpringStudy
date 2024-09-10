@@ -1,21 +1,26 @@
 package com.demo.spring.sec.role.usr.repository;
 
 
+import com.demo.spring.sec.role.usr.repository.mapper.UserAuthorMapper;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
-import com.demo.spring.sec.role.usr.vo.UserAuthorityId;
-import org.springframework.data.jpa.repository.JpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-public interface UserAuthorRepository extends JpaRepository<UserAuthority, UserAuthorityId> {
+@Component
+@RequiredArgsConstructor
+public class UserAuthorRepository {
 	
-	/**
-	 * {@snippet: SELECT * FROM tn_user_authority WHERE user_no = :userNo}
-	 *
-	 * @param userNo
-	 *
-	 * @return
-	 */
-	public List<UserAuthority> findByUserNo(String userNo);
+	private final UserAuthorJpository userAuthorJpository;
 	
+	private final UserAuthorMapper userAuthorMapper;
+	
+	public List<UserAuthority> getAuthorities(String userNo) {
+		return userAuthorJpository.findByUserNo(userNo);
+	}
+	
+	public String getAuthorityString(String userNo) {
+		return String.join(" > ", userAuthorMapper.getAuthorities(userNo));
+	}
 }

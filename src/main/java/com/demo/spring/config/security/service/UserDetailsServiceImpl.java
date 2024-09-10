@@ -33,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		if(user == null)
 			throw new UsernameNotFoundException("User Name " + username + "Not found Exception occured.");
 		UserDTO userDTO = new UserDTO(user);
-		List<UserAuthority> userAuthorities = userAuthorRepository.findByUserNo(userDTO.getUserNo());
+		List<UserAuthority> userAuthorities = userAuthorRepository.getAuthorities(userDTO.getUserNo());
 		return CustomUserDetails.builder()
 		                        .userDTO(userDTO)
 		                        .authorities(userAuthorities.stream()
