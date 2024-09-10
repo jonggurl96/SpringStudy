@@ -2,7 +2,7 @@ package com.demo.spring.config.jwt.filter;
 
 
 import com.demo.spring.config.jwt.provider.JwtProvider;
-import com.demo.spring.config.jwt.util.RequestHeaderWrapper;
+import com.demo.spring.config.jwt.util.JwtRequestWrapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,14 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,27 +27,29 @@ public class JwtFilter extends OncePerRequestFilter {
 	                                @NonNull HttpServletResponse response,
 	                                @NonNull FilterChain filterChain) throws ServletException, IOException {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if(authentication == null)
-			authentication = new AnonymousAuthenticationToken("anonymousUser",
-			                                                  "anonymousUser",
-			                                                  List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
 		
-		RequestHeaderWrapper wrapper = new RequestHeaderWrapper(request);
-		String header = provider.getHEADER();
+		if(isAnonymous(authentication)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 		
-		String jwtToken = wrapper.getHeader(header);
+		JwtRequestWrapper wrapper = new JwtRequestWrapper(request);
+		
+		String jwtToken = wrapper.getToken();
 		
 		jwtToken = jwtToken == null
-		           ? (isAnonymous(authentication) ? null : provider.fromAuthentication(authentication))
+		           ? provider.fromAuthentication(authentication)
 		           : provider.update(jwtToken, authentication);
 		
-		wrapper.addHeader(header, jwtToken);
+		wrapper.addToken(jwtToken);
+		
+		log.debug(">>> JWT Token: {}", wrapper.getToken());
 		
 		filterChain.doFilter(wrapper, response);
 	}
 	
 	private boolean isAnonymous(Authentication authentication) {
-		return authentication.getPrincipal().equals("anonymousUser");
+		return authentication == null || authentication.getPrincipal().equals("anonymousUser");
 	}
 	
 }

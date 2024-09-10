@@ -5,6 +5,7 @@ import com.demo.spring.config.security.annotation.AuthenticatedUser;
 import com.demo.spring.config.security.annotation.RsaAesReady;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.web.AbstractController;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,9 +41,10 @@ public class LoginController extends AbstractController {
 	}
 	
 	@GetMapping("/main")
-	public String mainPage(@AuthenticatedUser UserDTO userDTO, Model model) throws Exception {
-		log.debug(">>> main. {}", userDTO);
+	public String mainPage(@AuthenticatedUser UserDTO userDTO, Model model, HttpServletRequest request) throws Exception {
+		log.debug(">>> User access /main. {}", userDTO.getUserNo());
 		model.addAttribute("userDTO", userDTO);
+		model.addAttribute("jwt", request.getHeader("Authorization"));
 		return "/main";
 	}
 	

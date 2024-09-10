@@ -64,5 +64,4 @@ jwt:
     minute: 10
   token:
     prefix: Bearer
-    header: Authorization
 

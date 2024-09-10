@@ -50,20 +50,19 @@ public class JwtProvider {
 	@Value("#{'${jwt.token.prefix}' + ' '}")
 	private String PREFIX;
 	
-	@Value("${jwt.token.header}")
-	private String HEADER;
-	
 	private final PrivateKey PRIVATE_KEY;
 	
 	private final PublicKey PUBLIC_KEY;
 	
 	private static final String CHAINING = "||>";
 	
-	private static final String AUTHORITIES = "authorities";
+	private static final String AUTHORITIES = "Authorities";
 	
 	private static final String IP = "IP_Address";
 	
-	private static final String SESSIONID = "SESSION_ID";
+	private static final String SESSIONID = "Session_ID";
+	
+	private static final String PWD = "Password";
 	
 	public JwtProvider() {
 		KeyPair keyPair = Jwts.SIG.RS256.keyPair().build();
@@ -83,6 +82,7 @@ public class JwtProvider {
 		WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
 		
 		return PREFIX + getBuilder(userDTO.getUserNo())
+				.claim(PWD, userDTO.getPwd())
 				.claim(AUTHORITIES, authorities)
 				.claim(IP, details.getRemoteAddress())
 				.claim(SESSIONID, details.getSessionId())
@@ -141,9 +141,7 @@ public class JwtProvider {
 	}
 	
 	private boolean validateUser(Claims claims, UserDTO userDTO) {
-		if(!claims.getSubject().equals(userDTO.getUserNo()))
-			return false;
-		return true;
+		return claims.getSubject().equals(userDTO.getUserNo());
 	}
 	
 	private boolean validateUserDetails(Claims claims, Authentication authentication) {
@@ -154,7 +152,8 @@ public class JwtProvider {
 		
 		return checkIP(claims, details)
 		       && checkSession(claims, details)
-		       && checkAuthorities(claims, customUserDetails);
+		       && checkAuthorities(claims, customUserDetails)
+		       && checkPwd(claims, customUserDetails.getPassword());
 	}
 	
 	private boolean checkAuthorities(Claims claims, CustomUserDetails customUserDetails) {
@@ -171,6 +170,10 @@ public class JwtProvider {
 	
 	private boolean checkSession(Claims claims, WebAuthenticationDetails details) {
 		return claims.get(SESSIONID, String.class).equals(details.getSessionId());
+	}
+	
+	private boolean checkPwd(Claims claims, String pwd) {
+		return claims.get(PWD, String.class).equals(pwd);
 	}
 	
 }
