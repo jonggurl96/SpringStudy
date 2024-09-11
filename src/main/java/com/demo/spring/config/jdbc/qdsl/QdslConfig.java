@@ -1,6 +1,7 @@
-package com.demo.spring.config.qdsl;
+package com.demo.spring.config.jdbc.qdsl;
 
 
+import com.demo.spring.config.jdbc.qdsl.util.QdslSortGenerator;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -16,5 +17,10 @@ public class QdslConfig {
 	@Bean
 	public JPAQueryFactory jpaQueryFactory() {
 		return new JPAQueryFactory(em);
+	}
+	
+	@Bean
+	public QdslSortGenerator qdslSortGenerator() {
+		return new QdslSortGenerator();
 	}
 }
