@@ -11,12 +11,11 @@ import java.lang.annotation.Target;
 /**
  * ClassAlias.java
  * <pre>
- * Class마다 alias 등록
+ * Class마다 {alias|value} 등록
  * </pre>
  *
  * @author jongg
  * @version 1.0.0
- * @see com.demo.spring.config.jdbc.annotation.resolver.ClassAliasResolver
  * @since 24. 9. 11.
  */
 @Retention(RetentionPolicy.RUNTIME)
