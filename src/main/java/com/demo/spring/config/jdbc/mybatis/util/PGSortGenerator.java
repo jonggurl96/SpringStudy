@@ -31,12 +31,10 @@ public class PGSortGenerator implements MybatisSortGenerator {
 		String aggrFnct = description.getAggr();
 		String prop = description.getProp();
 		
-		if(aggregates.contains(aggrFnct)) {
-			if(aggrFnct.equalsIgnoreCase("NEGATE"))
-				return "-(" + prop + ")";
-			return aggrFnct + "(" + prop + ")";
-		}
+		if(aggrFnct == null || !aggregates.contains(aggrFnct))
+			return prop;
 		
-		return prop;
+		return (aggrFnct.equalsIgnoreCase("NEGATE") ? "-(" : (aggrFnct + "(")) + prop + ")";
 	}
+	
 }
