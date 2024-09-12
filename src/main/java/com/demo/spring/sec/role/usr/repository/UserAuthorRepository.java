@@ -1,6 +1,7 @@
 package com.demo.spring.sec.role.usr.repository;
 
 
+import com.demo.spring.sec.role.usr.repository.jpa.UserAuthorJpository;
 import com.demo.spring.sec.role.usr.repository.mapper.UserAuthorMapper;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
 import lombok.RequiredArgsConstructor;

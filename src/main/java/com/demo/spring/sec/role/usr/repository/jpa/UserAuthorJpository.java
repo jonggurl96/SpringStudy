@@ -1,4 +1,4 @@
-package com.demo.spring.sec.role.usr.repository;
+package com.demo.spring.sec.role.usr.repository.jpa;
 
 
 import com.demo.spring.sec.role.usr.vo.UserAuthority;

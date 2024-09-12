@@ -16,7 +16,7 @@ public class SortAop {
 	private final ClassAliasProvider classAliasProvider;
 	
 	@Before(
-			value = "execution(public java.util.List com.*..*Repository.*(..) ) && args(searchDTO, ..)",
+			value = "execution(public java.lang.Iterable+ com.*..*Repository.*(..) ) && args(searchDTO, ..)",
 			argNames = "searchDTO")
 	public void setClassProp(SearchDTO searchDTO) {
 		searchDTO.getSortDescriptions().forEach(this::setClassProp);

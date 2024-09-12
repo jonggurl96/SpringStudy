@@ -85,7 +85,7 @@ public class SecurityConfig {
 		http.formLogin(AbstractHttpConfigurer::disable);
 		
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/crypto/**", "/loginError**", "/login", "/actionLogin").permitAll()
+				.requestMatchers("/crypto/**", "/loginError**", "/login", "/actionLogin", "/test/**").permitAll()
 				.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 				.requestMatchers("/properties/**").hasRole("ADMIN")
 				.requestMatchers("/api/a/**").hasRole("A")

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.ibatis.type.Alias;
 
 import java.util.List;
 
@@ -12,8 +13,11 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Alias("searchdto")
 public class SearchDTO {
 	
 	private List<SortDescription> sortDescriptions;
+	
+	private String orderByClause;
 	
 }

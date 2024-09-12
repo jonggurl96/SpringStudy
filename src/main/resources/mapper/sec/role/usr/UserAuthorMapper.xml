@@ -7,4 +7,5 @@
           FROM tn_user_authority
          WHERE user_no = #{userNo}
     </select>
+
 </mapper>

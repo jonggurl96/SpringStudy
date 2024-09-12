@@ -1,6 +1,7 @@
 package com.demo.spring.usr.vo;
 
 
+import com.demo.spring.config.jdbc.annotation.ClassAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.Alias;
 
 @Getter
 @Entity
@@ -17,6 +19,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "tn_users")
 @Schema(description = "tn_user 엔티티")
+@ClassAlias("user")
+@Alias("user")
 public class User {
 	
 	@Id

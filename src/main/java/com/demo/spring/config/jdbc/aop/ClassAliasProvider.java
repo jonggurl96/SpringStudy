@@ -45,6 +45,7 @@ public class ClassAliasProvider {
 	}
 	
 	private void init() {
+		log.debug(">>> Init Annotation Class Map.");
 		Set<Class<?>> classes = findAnnotationClasses();
 		classes.forEach(c -> {
 			String alias = c.getAnnotation(ClassAlias.class).alias();
