@@ -12,17 +12,17 @@ public class JpaSortGenerator {
 	public Sort generate(List<SortDescription> descriptions) {
 		List<Sort.Order> orders = descriptions.stream()
 		                                      .sorted(Comparator.comparingInt(SortDescription::getPriority))
-		                                      .map(description -> {
-			                                      Sort.Direction direction =
-					                                      Sort.Direction.fromString(description.getDirection());
-			                                      
-			                                      Sort.NullHandling nullHandling = getNullHandling(description);
-			                                      
-			                                      return new Sort.Order(direction,
-			                                                            description.getProp(),
-			                                                            nullHandling);
-		                                      }).toList();
+		                                      .map(this::getOrder)
+		                                      .toList();
 		return Sort.by(orders);
+	}
+	
+	public Sort.Order getOrder(SortDescription description) {
+		Sort.Direction direction = Sort.Direction.fromString(description.getDirection());
+		
+		Sort.NullHandling nullHandling = getNullHandling(description);
+		
+		return new Sort.Order(direction, description.getProp(), nullHandling);
 	}
 	
 	public Sort.NullHandling getNullHandling(SortDescription description) {

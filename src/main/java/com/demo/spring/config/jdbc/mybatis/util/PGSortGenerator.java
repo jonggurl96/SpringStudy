@@ -17,7 +17,7 @@ public class PGSortGenerator implements MybatisSortGenerator {
 	}
 	
 	public String nullHandling(SortDescription description) {
-		String prop = description.getProp();
+		String prop = aggr(description);
 		String ret = switch(description.getNullHandling()) {
 			case 1 -> prop + " ISNULL DESC, ";
 			case 2 -> prop + " ISNULL, ";
@@ -26,4 +26,17 @@ public class PGSortGenerator implements MybatisSortGenerator {
 		return ret + prop + " " + description.getDirection();
 	}
 	
+	public String aggr(SortDescription description) {
+		List<String> aggregates = List.of("ABS", "AVG", "CEIL", "FLOOR", "NEGATE", "ROUND", "SQRT", "SUM");
+		String aggrFnct = description.getAggr();
+		String prop = description.getProp();
+		
+		if(aggregates.contains(aggrFnct)) {
+			if(aggrFnct.equalsIgnoreCase("NEGATE"))
+				return "-(" + prop + ")";
+			return aggrFnct + "(" + prop + ")";
+		}
+		
+		return prop;
+	}
 }
