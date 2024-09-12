@@ -57,11 +57,18 @@ public class SortDescription {
 	 */
 	private int nullHandling;
 	
+	@Getter(AccessLevel.NONE)
+	private String aggr;
+	
 	public void setAlias(String alias) {
 		this.alias = alias;
 		
 		String[] cp = alias.split("\\|");
 		setProp(cp[1]);
+	}
+	
+	public String getAggr() {
+		return aggr== null ? null : aggr.toUpperCase();
 	}
 	
 }
