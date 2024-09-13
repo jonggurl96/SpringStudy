@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.ibatis.type.Alias;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -16,7 +17,7 @@ import java.util.List;
 @Alias("searchdto")
 public class SearchDTO {
 	
-	private List<SortDescription> sortDescriptions;
+	private List<SortDescription> sortDescriptions = new ArrayList<>();
 	
 	private String orderByClause;
 	

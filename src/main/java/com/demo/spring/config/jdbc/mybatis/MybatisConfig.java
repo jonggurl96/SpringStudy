@@ -24,6 +24,8 @@ public class MybatisConfig {
 		PathMatchingResourcePatternResolver pmrpr = new PathMatchingResourcePatternResolver();
 		sqlSession.setMapperLocations(pmrpr.getResources("classpath:/mapper/**/*.xml"));
 		
+		sqlSession.setTypeAliasesPackage("com.demo.spring.**");
+		
 		return sqlSession.getObject();
 	}
 	
