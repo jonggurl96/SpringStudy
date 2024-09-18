@@ -4,10 +4,12 @@ package com.demo.spring.config.jdbc.aop;
 import com.demo.spring.config.jdbc.util.SearchDTO;
 import com.demo.spring.config.jdbc.util.SortDescription;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor

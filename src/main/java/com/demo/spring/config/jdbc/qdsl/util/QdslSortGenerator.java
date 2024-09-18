@@ -3,9 +3,7 @@ package com.demo.spring.config.jdbc.qdsl.util;
 
 import com.demo.spring.config.jdbc.util.SortDescription;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -34,6 +32,10 @@ public class QdslSortGenerator {
 			log.error(">>> Class {} Has No Field {}.", description.getClazz().getName(), description.getProp());
 			return null;
 		}
+		
+		if(expression == null)
+			return null;
+		
 		OrderSpecifier<?> order = description.getDirection().equalsIgnoreCase("DESC")
 		                          ? expression.desc()
 		                          : expression.asc();
@@ -50,7 +52,11 @@ public class QdslSortGenerator {
 	
 	public ComparableExpressionBase<?> createPath(SortDescription description) throws NoSuchFieldException {
 		Class<?> clazz = description.getClazz();
-		PathBuilder<?> parent = new PathBuilder<>(clazz, clazz.getSimpleName());
+		
+		if(clazz == null)
+			return null;
+		
+		SimplePath<?> parent = Expressions.path(clazz, description.getAlias());
 		
 		Class<?> propType = getPropType(description);
 		if(isNumber(propType)) {
@@ -60,7 +66,7 @@ public class QdslSortGenerator {
 				log.error(e.getMessage());
 			}
 		}
-		return parent.getComparable(description.getProp(), Comparable.class);
+		return Expressions.stringPath(parent, description.getProp());
 	}
 	
 	public ComparableExpressionBase<?> createAggrPath(SortDescription description, Class<?> propType) throws Exception {
@@ -69,24 +75,28 @@ public class QdslSortGenerator {
 		NumberPath<?> path;
 		
 		if(Integer.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Integer.class);
+			path = Expressions.numberPath(Integer.class, parent, description.getProp());
 		else if(Double.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Double.class);
+			path = Expressions.numberPath(Double.class, parent, description.getProp());
 		else if(Byte.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Byte.class);
+			path = Expressions.numberPath(Byte.class, parent, description.getProp());
 		else if(Float.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Float.class);
+			path = Expressions.numberPath(Float.class, parent, description.getProp());
 		else if(Short.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Short.class);
+			path = Expressions.numberPath(Short.class, parent, description.getProp());
 		else if(Long.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Long.class);
+			path = Expressions.numberPath(Long.class, parent, description.getProp());
 		else if(BigDecimal.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), BigDecimal.class);
+			path = Expressions.numberPath(BigDecimal.class, parent, description.getProp());
 		else if(Short.class.isAssignableFrom(propType))
-			path = parent.getNumber(description.getProp(), Short.class);
+			path = Expressions.numberPath(Short.class, parent, description.getProp());
 		else throw new Exception("Not Supported Class. " + propType.getName());
 		
-		return switch(description.getAggr()) {
+		return aggregate(path, description.getAggr());
+	}
+	
+	private ComparableExpressionBase<?> aggregate(NumberPath<?> path, String aggr) {
+		return switch(aggr) {
 			case "ABS" -> path.abs();
 			case "AVG" -> path.avg();
 			case "CEIL" -> path.ceil();

@@ -33,8 +33,12 @@ public class ClassAliasProvider {
 	
 	public Set<Class<?>> findAnnotationClasses() {
 		Set<Class<?>> classes = new HashSet<>();
-		for(BeanDefinition definition : provider.findCandidateComponents(BASE_PACKAGE)) {
+		for(BeanDefinition definition: provider.findCandidateComponents(BASE_PACKAGE)) {
 			String beanClassName = definition.getBeanClassName();
+			
+			if(beanClassName == null)
+				continue;
+			
 			try {
 				classes.add(Class.forName(beanClassName));
 			} catch(ClassNotFoundException ignored) {
@@ -48,8 +52,18 @@ public class ClassAliasProvider {
 		log.debug(">>> Init Annotation Class Map.");
 		Set<Class<?>> classes = findAnnotationClasses();
 		classes.forEach(c -> {
-			String alias = c.getAnnotation(ClassAlias.class).alias();
-			classMap.put(alias, c);
+			String packageName = c.getPackageName();
+			String simpleName = c.getSimpleName();
+			String qClassFqn = packageName + ".Q" + simpleName;
+			
+			String alias = c.getAnnotation(ClassAlias.class).value();
+			log.debug(">>> {} class alias is {}.", c, alias);
+			
+			try {
+				classMap.put(alias, Class.forName(qClassFqn));
+			} catch(ClassNotFoundException ignored) {
+				log.error(">>> Class {} Not Found.", qClassFqn);
+			}
 		});
 		initialized = true;
 	}

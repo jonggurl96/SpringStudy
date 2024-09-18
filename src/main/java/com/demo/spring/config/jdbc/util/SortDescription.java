@@ -3,6 +3,7 @@ package com.demo.spring.config.jdbc.util;
 
 import com.demo.spring.config.jdbc.annotation.UseClassAlias;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * SortDescription.java
@@ -24,6 +25,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @UseClassAlias
+@Slf4j
 public class SortDescription {
 	
 	/**
@@ -36,11 +38,9 @@ public class SortDescription {
 	 * <p>
 	 * Query DSL 사용 시 Path 찾기 위한 alias
 	 * <p>
-	 * ${ @ClassAlias("alias").property }
 	 *
 	 * @see com.demo.spring.config.jdbc.annotation.ClassAlias
 	 */
-	@Setter(AccessLevel.NONE)
 	private String alias;
 	
 	/**
@@ -73,12 +73,6 @@ public class SortDescription {
 	
 	public String getAggr() {
 		return aggr == null ? null : aggr.toUpperCase();
-	}
-	
-	public void setAlias(String aliasProp) {
-		String[] strs = aliasProp.split("\\.");
-		this.alias = strs[0];
-		this.prop = strs[1];
 	}
 	
 }

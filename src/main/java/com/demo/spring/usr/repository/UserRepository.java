@@ -2,6 +2,7 @@ package com.demo.spring.usr.repository;
 
 
 import com.demo.spring.config.jdbc.jpa.util.JpaSortGenerator;
+import com.demo.spring.config.jdbc.mybatis.util.MybatisSortGenerator;
 import com.demo.spring.config.jdbc.util.SearchDTO;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.usr.repository.jpa.UserJpository;
@@ -43,6 +44,8 @@ public class UserRepository {
 	 */
 	private final UserQpository userQpository;
 	
+	private final MybatisSortGenerator mybatisSortGenerator;
+	
 	private final JpaSortGenerator jpaSortGenerator;
 	
 	public User findByUserId(String userId) {
@@ -62,6 +65,8 @@ public class UserRepository {
 	}
 	
 	public List<User> testSortMb(SearchDTO searchDTO) {
+		String orderByClause = mybatisSortGenerator.generate(searchDTO.getSortDescriptions());
+		searchDTO.setOrderByClause(orderByClause);
 		return userMapper.testSort(searchDTO);
 	}
 	
