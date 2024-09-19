@@ -13,6 +13,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * ClassAliasProvider.java
+ * <pre>
+ * ClassAlias annotation을 명시한 클래스를 찾아 alias와 QClass FQN을 매칭
+ * 빈 등록 후 최초 호출 시점 1회 스캔 후 저장
+ * </pre>
+ *
+ * @author jongg
+ * @version 1.0.0
+ * @see com.demo.spring.config.jdbc.annotation.ClassAlias
+ * @since 2024-09-19
+ */
 @Slf4j
 @Component
 public class ClassAliasProvider {

@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * ClassAlias.java
  * <pre>
- * Class마다 {alias|value} 등록
+ * Class 별칭
  * </pre>
  *
  * @author jongg

@@ -1,7 +1,6 @@
 package com.demo.spring.config.jdbc.util;
 
 
-import com.demo.spring.config.jdbc.annotation.UseClassAlias;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@UseClassAlias
 @Slf4j
 public class SortDescription {
 	

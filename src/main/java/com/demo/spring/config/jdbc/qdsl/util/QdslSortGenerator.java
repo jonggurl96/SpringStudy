@@ -8,10 +8,35 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+/**
+ * QdslSortGenerator.java
+ * <pre>
+ * 정렬 가능한 클래스
+ *  1. @ClassAlias annotation을 추가한 클래스
+ *
+ * 정렬 가능한 property 속성
+ *  1. Number: Integer, Double, Byte, Float, Short, Long, BigDecimal, Short, BigInteger
+ *  2. Boolean
+ *  3. String
+ *  4. LocalDate
+ *  5. LocalDateTime
+ *  6. OffsetDateTime
+ * </pre>
+ *
+ * @author jongg
+ * @version 1.0.0
+ * @see com.demo.spring.config.jdbc.annotation.ClassAlias
+ * @since 2024-09-19
+ */
 
 @Slf4j
 public class QdslSortGenerator {
@@ -59,13 +84,23 @@ public class QdslSortGenerator {
 		SimplePath<?> parent = Expressions.path(clazz, description.getAlias());
 		
 		Class<?> propType = getPropType(description);
-		if(isNumber(propType)) {
+		
+		if(Number.class.isAssignableFrom(propType)) {
 			try {
 				return createAggrPath(description, propType);
 			} catch(Exception e) {
 				log.error(e.getMessage());
+				return null;
 			}
 		}
+		else if(Boolean.class.isAssignableFrom(propType))
+			return Expressions.booleanPath(parent, description.getProp());
+		else if(LocalDateTime.class.isAssignableFrom(propType))
+			return Expressions.dateTimePath(LocalDateTime.class, parent, description.getProp());
+		else if(OffsetDateTime.class.isAssignableFrom(propType))
+			return Expressions.dateTimePath(OffsetDateTime.class, parent, description.getProp());
+		else if(LocalDate.class.isAssignableFrom(propType))
+			return Expressions.datePath(LocalDate.class, parent, description.getProp());
 		return Expressions.stringPath(parent, description.getProp());
 	}
 	
@@ -90,6 +125,8 @@ public class QdslSortGenerator {
 			path = Expressions.numberPath(BigDecimal.class, parent, description.getProp());
 		else if(Short.class.isAssignableFrom(propType))
 			path = Expressions.numberPath(Short.class, parent, description.getProp());
+		else if(BigInteger.class.isAssignableFrom(propType))
+			path = Expressions.numberPath(BigInteger.class, parent, description.getProp());
 		else throw new Exception("Not Supported Class. " + propType.getName());
 		
 		return aggregate(path, description.getAggr());
@@ -107,10 +144,6 @@ public class QdslSortGenerator {
 			case "SUM" -> path.sum();
 			default -> path;
 		};
-	}
-	
-	public boolean isNumber(Class<?> clazz) {
-		return Number.class.isAssignableFrom(clazz);
 	}
 	
 	public Class<?> getPropType(SortDescription description) throws NoSuchFieldException {
