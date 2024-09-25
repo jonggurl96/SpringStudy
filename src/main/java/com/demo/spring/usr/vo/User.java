@@ -1,7 +1,7 @@
 package com.demo.spring.usr.vo;
 
 
-import com.demo.spring.config.jdbc.annotation.ClassAlias;
+import com.demo.spring.config.jdbc.qdsl.annotation.ClassAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

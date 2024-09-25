@@ -1,7 +1,7 @@
-package com.demo.spring.config.jdbc.aop;
+package com.demo.spring.config.jdbc.qdsl.annotation.provider;
 
 
-import com.demo.spring.config.jdbc.annotation.ClassAlias;
+import com.demo.spring.config.jdbc.qdsl.annotation.ClassAlias;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -22,7 +22,7 @@ import java.util.Set;
  *
  * @author jongg
  * @version 1.0.0
- * @see com.demo.spring.config.jdbc.annotation.ClassAlias
+ * @see ClassAlias
  * @since 2024-09-19
  */
 @Slf4j

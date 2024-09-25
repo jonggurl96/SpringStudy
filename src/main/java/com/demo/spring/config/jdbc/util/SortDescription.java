@@ -1,6 +1,7 @@
 package com.demo.spring.config.jdbc.util;
 
 
+import com.demo.spring.config.jdbc.qdsl.annotation.ClassAlias;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +38,7 @@ public class SortDescription {
 	 * Query DSL 사용 시 Path 찾기 위한 alias
 	 * <p>
 	 *
-	 * @see com.demo.spring.config.jdbc.annotation.ClassAlias
+	 * @see ClassAlias
 	 */
 	private String alias;
 	

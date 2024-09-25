@@ -1,4 +1,4 @@
-package com.demo.spring.config.jdbc.annotation;
+package com.demo.spring.config.jdbc.qdsl.annotation;
 
 
 import org.springframework.core.annotation.AliasFor;

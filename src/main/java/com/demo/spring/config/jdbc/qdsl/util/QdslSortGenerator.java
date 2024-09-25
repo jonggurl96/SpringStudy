@@ -1,6 +1,7 @@
 package com.demo.spring.config.jdbc.qdsl.util;
 
 
+import com.demo.spring.config.jdbc.qdsl.annotation.ClassAlias;
 import com.demo.spring.config.jdbc.util.SortDescription;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.*;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @author jongg
  * @version 1.0.0
- * @see com.demo.spring.config.jdbc.annotation.ClassAlias
+ * @see ClassAlias
  * @since 2024-09-19
  */
 

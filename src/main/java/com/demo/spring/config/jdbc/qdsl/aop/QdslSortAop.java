@@ -1,6 +1,7 @@
-package com.demo.spring.config.jdbc.aop;
+package com.demo.spring.config.jdbc.qdsl.aop;
 
 
+import com.demo.spring.config.jdbc.qdsl.annotation.provider.ClassAliasProvider;
 import com.demo.spring.config.jdbc.util.SearchDTO;
 import com.demo.spring.config.jdbc.util.SortDescription;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class SortAop {
+public class QdslSortAop {
 	
 	private final ClassAliasProvider classAliasProvider;
 	
 	@Before(
-			value = "execution(public java.lang.Iterable+ com.*..*Repository.*(..) ) && args(searchDTO, ..)",
+			value = "execution(public java.lang.Iterable+ com.*..*QpositoryImpl.*(..) ) && args(searchDTO, ..)",
 			argNames = "searchDTO")
 	public void setClassProp(SearchDTO searchDTO) {
 		searchDTO.getSortDescriptions().forEach(this::setClassProp);
