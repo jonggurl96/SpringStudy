@@ -1,9 +1,9 @@
 package com.demo.spring.usr.repository.qdsl;
 
 
-import com.demo.spring.config.jdbc.util.SearchDTO;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.usr.vo.User;
+import com.querydsl.core.types.OrderSpecifier;
 
 import java.util.List;
 
@@ -23,5 +23,5 @@ public interface UserQpository {
 	
 	public void initCntLoginFailr(UserDTO userDTO);
 	
-	public List<User> testSort(SearchDTO searchDTO);
+	public List<User> testSort(OrderSpecifier<?>[] orderSpecifiers);
 }

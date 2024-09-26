@@ -1,8 +1,6 @@
 package com.demo.spring.usr.repository.qdsl.impl;
 
 
-import com.demo.spring.config.jdbc.qdsl.util.QdslSortGenerator;
-import com.demo.spring.config.jdbc.util.SearchDTO;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.usr.repository.qdsl.UserQpository;
 import com.demo.spring.usr.vo.QUser;
@@ -21,8 +19,6 @@ import java.util.List;
 public class UserQpositoryImpl implements UserQpository {
 	
 	private final JPAQueryFactory qf;
-	
-	private final QdslSortGenerator qdslSortGenerator;
 	
 	@Override
 	public void increaseCntLoginFailr(UserDTO userDTO) {
@@ -45,16 +41,12 @@ public class UserQpositoryImpl implements UserQpository {
 	}
 	
 	@Override
-	public List<User> testSort(SearchDTO searchDTO) {
+	public List<User> testSort(OrderSpecifier<?>[] orderSpecifiers) {
 		QUser qUser = QUser.user;
 		
 		return qf.selectFrom(qUser)
-		         .orderBy(getOrderByClause(searchDTO))
+		         .orderBy(orderSpecifiers)
 		         .fetch();
-	}
-	
-	private OrderSpecifier<?>[] getOrderByClause(SearchDTO searchDTO) {
-		return qdslSortGenerator.generate(searchDTO.getSortDescriptions()).toArray(new OrderSpecifier[]{});
 	}
 	
 }

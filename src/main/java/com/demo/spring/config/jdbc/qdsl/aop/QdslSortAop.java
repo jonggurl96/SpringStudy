@@ -19,7 +19,7 @@ public class QdslSortAop {
 	private final ClassAliasProvider classAliasProvider;
 	
 	@Before(
-			value = "execution(public java.lang.Iterable+ com.*..*QpositoryImpl.*(..) ) && args(searchDTO, ..)",
+			value = "execution(public java.lang.Iterable+ com.*..*QdslServiceImpl.*(..) ) && args(searchDTO, ..)",
 			argNames = "searchDTO")
 	public void setClassProp(SearchDTO searchDTO) {
 		searchDTO.getSortDescriptions().forEach(this::setClassProp);

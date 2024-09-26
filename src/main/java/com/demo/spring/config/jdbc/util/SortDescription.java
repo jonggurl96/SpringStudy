@@ -48,7 +48,7 @@ public class SortDescription {
 	private Class<?> clazz;
 	
 	/**
-	 * 정렬할 컬럼의 alias 또는 column name
+	 * 정렬할 column name
 	 */
 	private String prop;
 	

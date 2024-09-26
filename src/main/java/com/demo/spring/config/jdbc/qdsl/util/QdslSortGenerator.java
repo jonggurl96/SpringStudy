@@ -3,6 +3,7 @@ package com.demo.spring.config.jdbc.qdsl.util;
 
 import com.demo.spring.config.jdbc.qdsl.annotation.ClassAlias;
 import com.demo.spring.config.jdbc.util.SortDescription;
+import com.demo.spring.config.jdbc.util.SortGenerator;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.*;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * QdslSortGenerator.java
@@ -40,14 +40,17 @@ import java.util.stream.Collectors;
  */
 
 @Slf4j
-public class QdslSortGenerator {
+public class QdslSortGenerator implements SortGenerator<OrderSpecifier<?>[]> {
 	
-	public List<OrderSpecifier<?>> generate(List<SortDescription> descriptions) {
+	@Override
+	public OrderSpecifier<?>[] generate(List<SortDescription> descriptions) {
 		return descriptions.stream()
+		                   .filter(this::available)
 		                   .sorted(Comparator.comparingInt(SortDescription::getPriority))
 		                   .map(this::toOrderSpec)
 		                   .filter(Objects::nonNull)
-		                   .collect(Collectors.toUnmodifiableList());
+		                   .toList()
+		                   .toArray(new OrderSpecifier[]{});
 	}
 	
 	public OrderSpecifier<?> toOrderSpec(SortDescription description) {
@@ -59,12 +62,10 @@ public class QdslSortGenerator {
 			return null;
 		}
 		
-		if(expression == null)
-			return null;
+		if(expression == null) return null;
 		
-		OrderSpecifier<?> order = description.getDirection().equalsIgnoreCase("DESC")
-		                          ? expression.desc()
-		                          : expression.asc();
+		OrderSpecifier<?> order = description.getDirection().equalsIgnoreCase("DESC") ? expression.desc() :
+		                          expression.asc();
 		return setNullHandling(order, description);
 	}
 	
@@ -78,9 +79,6 @@ public class QdslSortGenerator {
 	
 	public ComparableExpressionBase<?> createPath(SortDescription description) throws NoSuchFieldException {
 		Class<?> clazz = description.getClazz();
-		
-		if(clazz == null)
-			return null;
 		
 		SimplePath<?> parent = Expressions.path(clazz, description.getAlias());
 		
@@ -151,6 +149,11 @@ public class QdslSortGenerator {
 		Field field = description.getClazz().getDeclaredField(description.getProp());
 		field.setAccessible(true);
 		return field.getType();
+	}
+	
+	@Override
+	public boolean available(SortDescription description) {
+		return SortGenerator.super.available(description) && description.getClazz() != null;
 	}
 	
 }

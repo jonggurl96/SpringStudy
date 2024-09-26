@@ -2,18 +2,19 @@ package com.demo.spring.config.jdbc.jpa.util;
 
 
 import com.demo.spring.config.jdbc.util.SortDescription;
+import com.demo.spring.config.jdbc.util.SortGenerator;
 import org.springframework.data.domain.Sort;
 
 import java.util.Comparator;
 import java.util.List;
 
-public class JpaSortGenerator {
+public class JpaSortGenerator implements SortGenerator<Sort> {
 	
 	public Sort generate(List<SortDescription> descriptions) {
 		List<Sort.Order> orders = descriptions.stream()
+		                                      .filter(this::available)
 		                                      .sorted(Comparator.comparingInt(SortDescription::getPriority))
-		                                      .map(this::getOrder)
-		                                      .toList();
+		                                      .map(this::getOrder).toList();
 		return Sort.by(orders);
 	}
 	

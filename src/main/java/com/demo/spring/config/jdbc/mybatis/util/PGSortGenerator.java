@@ -12,6 +12,7 @@ public class PGSortGenerator implements MybatisSortGenerator {
 	public String generate(List<SortDescription> descriptions) {
 		return String.join(", ",
 		                   descriptions.stream()
+		                               .filter(this::available)
 		                               .sorted(Comparator.comparingInt(SortDescription::getPriority))
 		                               .map(this::nullHandling).toList());
 	}
@@ -23,7 +24,7 @@ public class PGSortGenerator implements MybatisSortGenerator {
 			case 2 -> prop + " ISNULL, ";
 			default -> "";
 		};
-		return ret + prop + " " + description.getDirection();
+		return ret + prop + " " + getDirection(description);
 	}
 	
 	public String aggr(SortDescription description) {
@@ -35,6 +36,11 @@ public class PGSortGenerator implements MybatisSortGenerator {
 			return prop;
 		
 		return (aggrFnct.equalsIgnoreCase("NEGATE") ? "-(" : (aggrFnct + "(")) + prop + ")";
+	}
+	
+	private String getDirection(SortDescription description) {
+		String direction = description.getDirection();
+		return direction == null || direction.isBlank() ? "ASC" : direction;
 	}
 	
 }

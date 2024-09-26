@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -16,19 +15,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MybatisSortAop {
 	
-	private final MybatisSortGenerator sortGenerator;
-	
-	@Pointcut(value = "bean(*Mapper)")
-	private void mapperPointcut() {}
-	
-	@Before(value = "mapperPointcut()")
-	public void set() {}
+	private final MybatisSortGenerator mybatisSortGenerator;
 	
 	@Before(
-			value = "within(com.*..*Mapper) && args(searchDTO, ..)",
+			value = "execution(public java.lang.Iterable+ com.*..*MybatisServiceImpl.*(..)) && args(searchDTO, ..)",
 			argNames = "searchDTO")
 	public void setOrderByClause(SearchDTO searchDTO) {
-		String orderByClause = sortGenerator.generate(searchDTO.getSortDescriptions());
+		String orderByClause = mybatisSortGenerator.generate(searchDTO.getSortDescriptions());
 		searchDTO.setOrderByClause(orderByClause);
 	}
 }
