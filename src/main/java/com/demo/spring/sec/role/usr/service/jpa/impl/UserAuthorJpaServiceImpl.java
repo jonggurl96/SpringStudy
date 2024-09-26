@@ -1,27 +1,25 @@
-package com.demo.spring.sec.role.usr.repository;
+package com.demo.spring.sec.role.usr.service.jpa.impl;
 
 
 import com.demo.spring.sec.role.usr.repository.jpa.UserAuthorJpository;
-import com.demo.spring.sec.role.usr.repository.mapper.UserAuthorMapper;
+import com.demo.spring.sec.role.usr.service.jpa.UserAuthorJpaService;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Slf4j
+@Service
 @RequiredArgsConstructor
-public class UserAuthorRepository {
+public class UserAuthorJpaServiceImpl implements UserAuthorJpaService {
 	
 	private final UserAuthorJpository userAuthorJpository;
 	
-	private final UserAuthorMapper userAuthorMapper;
-	
+	@Override
 	public List<UserAuthority> getAuthorities(String userNo) {
 		return userAuthorJpository.findByUserNo(userNo);
 	}
 	
-	public String getAuthorityString(String userNo) {
-		return String.join(" > ", userAuthorMapper.getAuthorities(userNo));
-	}
 }

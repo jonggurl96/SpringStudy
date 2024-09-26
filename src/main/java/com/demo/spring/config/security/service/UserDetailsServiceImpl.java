@@ -2,7 +2,7 @@ package com.demo.spring.config.security.service;
 
 
 import com.demo.spring.config.security.auth.CustomUserDetails;
-import com.demo.spring.sec.role.usr.repository.UserAuthorRepository;
+import com.demo.spring.sec.role.usr.service.jpa.UserAuthorJpaService;
 import com.demo.spring.sec.role.usr.vo.UserAuthority;
 import com.demo.spring.usr.dto.UserDTO;
 import com.demo.spring.usr.service.jpa.UserJpaService;
@@ -28,7 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	
 	private final UserQdslService userQdslService;
 	
-	private final UserAuthorRepository userAuthorRepository;
+	private final UserAuthorJpaService userAuthorJpaService;
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -36,7 +36,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		if(user == null)
 			throw new UsernameNotFoundException("User Name " + username + "Not found Exception occured.");
 		UserDTO userDTO = new UserDTO(user);
-		List<UserAuthority> userAuthorities = userAuthorRepository.getAuthorities(userDTO.getUserNo());
+		List<UserAuthority> userAuthorities = userAuthorJpaService.getAuthorities(userDTO.getUserNo());
 		return CustomUserDetails.builder()
 		                        .userDTO(userDTO)
 		                        .authorities(userAuthorities.stream()
